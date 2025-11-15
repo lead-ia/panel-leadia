@@ -96,12 +96,6 @@ export function IntegrationsTab() {
                   <span className="text-sm font-medium">Não conectado</span>
                 </div>
               )}
-
-              <Button
-                onClick={() => handleConnect(integration.id)}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground"
-              >
-              </Button>
             </div>
           </div>
         ))}
