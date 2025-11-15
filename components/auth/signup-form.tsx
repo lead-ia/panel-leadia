@@ -6,15 +6,29 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 
+import { createUserWithEmailAndPassword, getAuth, updateProfile, User } from 'firebase/auth';
+import { app } from "@/firebase"
+
+const handleSignUp = async (email: string, password: string, fullName: string): Promise<User> => {
+  const auth = getAuth(app);
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    await updateProfile(userCredential.user, { displayName: fullName });
+    return userCredential.user;
+  } catch (error: any) {
+    if (error.code === 'auth/email-already-in-use') {
+      throw new Error("Este email já está em uso.");
+    }
+    throw new Error("Erro ao registrar. Tente novamente mais tarde.");
+  }
+};
+
 export function SignupForm() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     confirmPassword: "",
-    cardNumber: "",
-    expiry: "",
-    cvv: "",
-    cardholderName: "",
+    fullName: "",
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
@@ -37,36 +51,18 @@ export function SignupForm() {
     }
 
     try {
-      // ============================================
-      // ENDPOINT TO REPLACE: /api/auth/signup
-      // Expected POST body: {
-      //   email, password, cardNumber, expiry, cvv, cardholderName
-      // }
-      // Expected response: { success: true, token: string }
-      // ============================================
-      const response = await fetch("/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-          cardNumber: formData.cardNumber,
-          expiry: formData.expiry,
-          cvv: formData.cvv,
-          cardholderName: formData.cardholderName,
-        }),
-      })
+      const user = await handleSignUp(formData.email, formData.password, formData.fullName);
 
-      const data = await response.json()
-
-      if (data.success) {
-        localStorage.setItem("token", data.token)
+      if (user) {
+        const maxAge = 60 * 60 * 24 * 7 // 7 days
+        const secure = location.protocol === "https:" ? "; Secure" : "";
+        document.cookie = `token=${encodeURIComponent(user.uid)}; Path=/; Max-Age=${maxAge}; SameSite=Lax${secure}`;
         router.push("/dashboard")
       } else {
-        setError(data.error || "Erro ao registrar")
+        setError("Ocorreu um erro inesperado ao registrar.")
       }
     } catch (err) {
-      setError("Erro na conexão")
+      setError(err instanceof Error ? err.message : "Erro na conexão");
     } finally {
       setLoading(false)
     }
@@ -79,6 +75,38 @@ export function SignupForm() {
           {error}
         </div>
       )}
+
+      {/* Full Name */}
+      <div>
+        <label htmlFor="fullName" className="block text-sm font-medium text-foreground mb-2">
+          Nome Completo
+        </label>
+        <div className="relative">
+          <svg
+            className="absolute left-3 top-3 w-5 h-5 text-muted-foreground"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+            />
+          </svg>
+          <input
+            id="fullName"
+            name="fullName"
+            type="text"
+            placeholder="(Nome do médico a ser exibido)"
+            value={formData.fullName}
+            onChange={handleChange}
+            className="w-full pl-10 pr-4 py-3 border border-input bg-background text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            required
+          />
+        </div>
+      </div>
 
       {/* Email */}
       <div>
@@ -100,6 +128,7 @@ export function SignupForm() {
             />
           </svg>
           <input
+            id="email"
             name="email"
             type="email"
             placeholder="o.seu@email.com"
@@ -131,6 +160,7 @@ export function SignupForm() {
             />
           </svg>
           <input
+            id="password"
             name="password"
             type="password"
             placeholder="Crie uma palavra-passe forte"
@@ -162,6 +192,7 @@ export function SignupForm() {
             />
           </svg>
           <input
+            id="confirmPassword"
             name="confirmPassword"
             type="password"
             placeholder="Confirme a sua palavra-passe"
@@ -173,128 +204,7 @@ export function SignupForm() {
         </div>
       </div>
 
-      <div className="pt-4 border-t border-border">
-        <h3 className="text-sm font-semibold text-foreground mb-4">Informações de pagamento</h3>
-
-        {/* Card Number */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-foreground mb-2">Número do cartão</label>
-          <div className="relative">
-            <svg
-              className="absolute left-3 top-3 w-5 h-5 text-muted-foreground"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V5a3 3 0 00-3-3H5a3 3 0 00-3 3v10a3 3 0 003 3z"
-              />
-            </svg>
-            <input
-              name="cardNumber"
-              type="text"
-              placeholder="0000 0000 0000 0000"
-              value={formData.cardNumber}
-              onChange={handleChange}
-              className="w-full pl-10 pr-4 py-3 border border-input bg-background text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              maxLength="19"
-              required
-            />
-          </div>
-        </div>
-
-        {/* Expiry and CVV */}
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">Data de validade</label>
-            <div className="relative">
-              <svg
-                className="absolute left-3 top-3 w-5 h-5 text-muted-foreground"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
-              <input
-                name="expiry"
-                type="text"
-                placeholder="MM/AA"
-                value={formData.expiry}
-                onChange={handleChange}
-                className="w-full pl-10 pr-4 py-3 border border-input bg-background text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                maxLength="5"
-                required
-              />
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">CVV</label>
-            <div className="relative">
-              <svg
-                className="absolute left-3 top-3 w-5 h-5 text-muted-foreground"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                />
-              </svg>
-              <input
-                name="cvv"
-                type="text"
-                placeholder="123"
-                value={formData.cvv}
-                onChange={handleChange}
-                className="w-full pl-10 pr-4 py-3 border border-input bg-background text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                maxLength="4"
-                required
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Cardholder Name */}
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-2">Nome do titular do cartão</label>
-          <div className="relative">
-            <svg
-              className="absolute left-3 top-3 w-5 h-5 text-muted-foreground"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-              />
-            </svg>
-            <input
-              name="cardholderName"
-              type="text"
-              placeholder="Nome completo"
-              value={formData.cardholderName}
-              onChange={handleChange}
-              className="w-full pl-10 pr-4 py-3 border border-input bg-background text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              required
-            />
-          </div>
-        </div>
-      </div>
+    
 
       <Button
         type="submit"

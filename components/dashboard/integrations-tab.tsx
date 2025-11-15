@@ -60,7 +60,7 @@ export function IntegrationsTab() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold text-foreground mb-2">Integrações Disponíveis</h2>
+        <h2 className="text-xl font-semibold text-foreground mb-2">Integrações Indisponíveis</h2>
         <p className="text-muted-foreground">Conecte suas ferramentas favoritas ao LeadIA</p>
       </div>
 
@@ -71,7 +71,13 @@ export function IntegrationsTab() {
             className="flex items-center justify-between p-6 bg-card border border-border rounded-lg hover:shadow-md transition-shadow"
           >
             <div className="flex items-center gap-4 flex-1">
-              <div className="text-3xl">{integration.icon}</div>
+              <div className="text-3xl">
+                {integration.icon === "📅" ? (
+                  <img src="/google-calendar.svg" alt="Google Calendar" className="w-8 h-8" />
+                ) : integration.icon === "💬" ? (
+                  <img src="/whatsapp.svg" alt="WhatsApp" className="w-8 h-8" />
+                ) : (integration.icon)}
+              </div>
               <div>
                 <h3 className="font-semibold text-foreground">{integration.name}</h3>
                 <p className="text-sm text-muted-foreground">{integration.description}</p>
@@ -95,7 +101,6 @@ export function IntegrationsTab() {
                 onClick={() => handleConnect(integration.id)}
                 className="bg-primary hover:bg-primary/90 text-primary-foreground"
               >
-                {integration.connected ? "Desconectar" : "Conectar"}
               </Button>
             </div>
           </div>

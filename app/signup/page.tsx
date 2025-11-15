@@ -1,6 +1,7 @@
 "use client"
 
 import { SignupForm } from "@/components/auth/signup-form"
+import Image from "next/image"
 import Link from "next/link"
 
 export default function SignupPage() {
@@ -16,7 +17,7 @@ export default function SignupPage() {
         </div>
 
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-foreground">LeadIA</h1>
+          <Image src="/logo.png" alt="LeadIA Logo" width={100} height={28} />
           <p className="text-muted-foreground mt-2">Registre-se para começar</p>
         </div>
 
