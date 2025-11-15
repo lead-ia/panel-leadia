@@ -9,8 +9,8 @@ const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "LeadIA - Lead Management Platform",
-  description: "AI-powered lead management with integrations",
+  title: "LeadIA",
+  description: "Plataforma de Inteligência Artificial para Saúde",
   generator: "v0.app",
 }
 

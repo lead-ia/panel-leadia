@@ -13,9 +13,6 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* <div className="text-center mb-8">
-          <p className="text-muted-foreground mt-2">LeadIA - Plataforma de Inteligência Artificial para Saúde</p>
-        </div> */}
 
         <LoginForm />
 
