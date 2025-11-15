@@ -7,15 +7,15 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="flex justify-center mb-8 bg-gray-600" >
+        <div className="flex justify-center mb-8 bg-gradient-to-r from-primary to-primary rounded-xl" >
           <div className="w-64 h-32 rounded-xl flex items-center justify-center" >
             <Image  src="/logo.png" alt="LeadIA Logo" width={240} height={240} />
           </div>
         </div>
 
-        <div className="text-center mb-8">
+        {/* <div className="text-center mb-8">
           <p className="text-muted-foreground mt-2">LeadIA - Plataforma de Inteligência Artificial para Saúde</p>
-        </div>
+        </div> */}
 
         <LoginForm />
 
