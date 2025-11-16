@@ -13,7 +13,7 @@ interface Integration {
 }
 
 export function IntegrationsTab() {
-  const [integrations, setIntegrations] = useState<Integration[]>([
+  const [integrations ] = useState<Integration[]>([
     {
       id: "google-calendar",
       name: "Google Calendar",
@@ -29,33 +29,6 @@ export function IntegrationsTab() {
       connected: false,
     },
   ])
-
-  const handleConnect = async (integrationId: string) => {
-    try {
-      // ============================================
-      // ENDPOINT TO REPLACE: /api/integrations/connect
-      // Expected POST body: { integrationId: string }
-      // Expected response: { success: true, url: string }
-      // ============================================
-      const response = await fetch("/api/integrations/connect", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ integrationId }),
-      })
-
-      const data = await response.json()
-
-      if (data.success) {
-        setIntegrations((prev) => prev.map((int) => (int.id === integrationId ? { ...int, connected: true } : int)))
-
-        if (data.url) {
-          window.open(data.url, "_blank")
-        }
-      }
-    } catch (err) {
-      console.error("Error connecting integration:", err)
-    }
-  }
 
   return (
     <div className="space-y-6">

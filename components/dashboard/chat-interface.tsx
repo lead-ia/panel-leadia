@@ -11,9 +11,8 @@ interface Message {
   timestamp: string
 }
 
-const customer = "Cliente Exemplo";
 
-export function ChatInterface() {
+export function ChatInterfaceTab() {
   const { user } = useAuth()
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
@@ -36,7 +35,7 @@ export function ChatInterface() {
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      sender: customer,
+      sender: "user",
       text: input,
       timestamp: new Date().toLocaleTimeString(),
     }
@@ -48,36 +47,30 @@ export function ChatInterface() {
     try {
       const headers: HeadersInit = {
         "Content-Type": "application/json",
-        "X-App-Secret": process.env.WEBFLOW_SECRET_KEY || "bd06c285046f40d8bbc59cf21c16cc31",
+        "x-app-secret": process.env.WEBFLOW_SECRET_KEY || "bd06c285046f40d8bbc59cf21c16cc31",
       }
 
-      if (sessionId) {
-        headers["x-session-id"] = sessionId
-      }
 
       const response = await fetch("https://workflow.leadia.com.br/webhook/message", {
         method: "POST",
         headers,
         body: JSON.stringify({
           message: userMessage.text,
-          client: customer,
-          doctor: user?.displayName || "Dr. AI",
+          uid: user!.uid,
+          sessionId: sessionId,
         }),
       })
 
       if (!response.ok) throw new Error("HTTP error")
 
-      // If first message → capture session ID
-      if (!sessionId) {
-        const newSessionId = response.headers.get("x-session-id")
-        if (newSessionId) setSessionId(newSessionId)
-      }
-
+      
       const responsejson = await response.json()
 
       const replyText = responsejson.reply
 
-      
+      if (!sessionId) {
+        setSessionId(responsejson.sessionId)
+      }
 
       const botMessage: Message = {
         id: crypto.randomUUID(),
@@ -107,7 +100,7 @@ export function ChatInterface() {
   return (
     <div className="flex flex-col h-[600px] bg-card border border-border rounded-lg overflow-hidden">
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
-        <h2 className="text-lg font-semibold mb-6">LeadIA Chat Bot | {customer}</h2>
+        <h2 className="text-lg font-semibold mb-6">LeadIA Chat Bot </h2>
 
         {messages.map((msg) => (
           <div key={msg.id} className={`flex gap-4 ${msg.sender === "user" ? "justify-end" : "justify-start"}`}>
