@@ -17,7 +17,7 @@ export default function LoginPage() {
         <LoginForm />
 
         <p className="text-center text-sm text-muted-foreground mt-6">
-          Não tem uma conta registrada?{" "}
+          Ainda não tem uma conta?{" "}
           <Link href="/signup" className="text-primary hover:underline font-semibold">
             Registre-se aqui
           </Link>
