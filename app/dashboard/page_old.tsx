@@ -1,17 +1,13 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import { Header } from "@/components/core/Header";
-import { ChatInterfaceTab } from "@/components/dashboard/chat-interface";
-import { IntegrationsTab } from "@/components/dashboard/integrations";
-import { SettingsTab } from "@/components/dashboard/settings";
-import DashboardHeader from "@/components/home/dashboard-header";
-import { Footer } from "@/components/core/Footer";
+import { useState } from "react"
+import { DashboardHeader } from "@/components/dashboard/header"
+import { ChatInterfaceTab } from "@/components/dashboard/chat-interface"
+import { IntegrationsTab } from "@/components/dashboard/integrations"
+import { SettingsTab } from "@/components/dashboard/settings"
 
 export default function DashboardPage() {
-  const [activeTab, setActiveTab] = useState<
-    "chat" | "integrations" | "settings"
-  >("integrations");
+  const [activeTab, setActiveTab] = useState<"chat" | "integrations" | "settings">("integrations")
 
   return (
     <div className="min-h-screen bg-background">
@@ -19,11 +15,7 @@ export default function DashboardPage() {
 
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Tab Navigation */}
-        <div
-          className="flex gap-8 border-b border-border border-b-opacity-20 mb-8 space-x-4"
-          role="tablist"
-          aria-label="Dashboard tabs"
-        >
+        <div className="flex gap-8 border-b border-border border-b-opacity-20 mb-8 space-x-4" role="tablist" aria-label="Dashboard tabs">
           <button
             role="tab"
             aria-selected={activeTab === "integrations"}
@@ -67,9 +59,8 @@ export default function DashboardPage() {
         {/* Tab Content */}
         {activeTab === "chat" && <ChatInterfaceTab />}
         {activeTab === "integrations" && <IntegrationsTab />}
-        {activeTab === "settings" && <SettingsTab />}
+        {activeTab === "settings" &&  <SettingsTab/>}
       </div>
-      <Footer />
     </div>
-  );
+  )
 }
