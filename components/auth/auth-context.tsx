@@ -1,8 +1,14 @@
 "use client";
 // AuthContext.tsx
 import { app } from "@/firebase";
-import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
-import {  ReactNode, useContext, createContext, useState, useEffect } from 'react';
+import { getAuth, onAuthStateChanged, User } from "firebase/auth";
+import {
+  ReactNode,
+  useContext,
+  createContext,
+  useState,
+  useEffect,
+} from "react";
 
 interface AuthContextType {
   user: User | null;
@@ -20,7 +26,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-
     const auth = getAuth(app);
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
@@ -43,7 +48,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
