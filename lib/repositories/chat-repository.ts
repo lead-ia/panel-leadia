@@ -1,5 +1,5 @@
 export interface Conversation {
-  id: number;
+  id: string;
   name: string;
   lastMessage: string;
   time: string;
@@ -8,8 +8,36 @@ export interface Conversation {
   avatar: string;
 }
 
+export interface Message {
+  id: string;
+  body: string;
+  from: string;
+  to: string;
+  timestamp: number;
+  hasMedia: boolean;
+  ack: number; // 0: pending, 1: sent, 2: delivered, 3: read, 4: played
+  fromMe: boolean;
+  type: 'chat' | 'image' | 'sticker' | 'document' | 'video' | 'audio' | 'unknown';
+  mediaUrl?: string;
+  caption?: string;
+  mimetype?: string;
+  fileName?: string;
+  fileLength?: number;
+}
+
+export interface Contact {
+  id: string;
+  name: string;
+  pushname: string;
+}
+
 export interface IChatRepository {
   getConversations(): Promise<Conversation[]>;
+  getChatMessages(sessionName: string, chatId: string): Promise<Message[]>;
+  getAllContacts(sessionName: string): Promise<Contact[]>;
+  getPhoneNumberByLid(sessionName: string, lid: string): Promise<string | null>;
+  onNewMessage(callback: (message: any) => void): void;
+  removeMessageListener(callback: (message: any) => void): void;
 }
 
 export class ChatRepository implements IChatRepository {
@@ -19,7 +47,7 @@ export class ChatRepository implements IChatRepository {
 
     return [
       {
-        id: 1,
+        id: '1',
         name: 'Maria Silva',
         lastMessage: 'Gostaria de remarcar minha consulta',
         time: '10:30',
@@ -28,7 +56,7 @@ export class ChatRepository implements IChatRepository {
         avatar: 'MS',
       },
       {
-        id: 2,
+        id: '2',
         name: 'João Santos',
         lastMessage: 'Obrigado pelo atendimento!',
         time: '09:45',
@@ -37,7 +65,7 @@ export class ChatRepository implements IChatRepository {
         avatar: 'JS',
       },
       {
-        id: 3,
+        id: '3',
         name: 'Ana Oliveira',
         lastMessage: 'Qual o horário disponível?',
         time: '08:20',
@@ -46,7 +74,7 @@ export class ChatRepository implements IChatRepository {
         avatar: 'AO',
       },
       {
-        id: 4,
+        id: '4',
         name: 'Carlos Mendes',
         lastMessage: 'Preciso dos resultados do exame',
         time: 'Ontem',
@@ -55,7 +83,7 @@ export class ChatRepository implements IChatRepository {
         avatar: 'CM',
       },
       {
-        id: 5,
+        id: '5',
         name: 'Beatriz Costa',
         lastMessage: 'Confirmado para amanhã',
         time: 'Ontem',
@@ -64,7 +92,7 @@ export class ChatRepository implements IChatRepository {
         avatar: 'BC',
       },
       {
-        id: 6,
+        id: '6',
         name: 'Pedro Alves',
         lastMessage: 'Preciso agendar uma consulta',
         time: 'Ontem',
@@ -73,7 +101,7 @@ export class ChatRepository implements IChatRepository {
         avatar: 'PA',
       },
       {
-        id: 7,
+        id: '7',
         name: 'Lucia Martins',
         lastMessage: 'Pode me enviar o comprovante?',
         time: '2 dias',
@@ -82,7 +110,7 @@ export class ChatRepository implements IChatRepository {
         avatar: 'LM',
       },
       {
-        id: 8,
+        id: '8',
         name: 'Roberto Silva',
         lastMessage: 'Esqueci minha carteira de convênio',
         time: '2 dias',
@@ -91,7 +119,7 @@ export class ChatRepository implements IChatRepository {
         avatar: 'RS',
       },
       {
-        id: 9,
+        id: '9',
         name: 'Fernanda Costa',
         lastMessage: 'Estava sentindo dores ontem',
         time: '2 dias',
@@ -99,60 +127,50 @@ export class ChatRepository implements IChatRepository {
         tag: 'Urgente',
         avatar: 'FC',
       },
+    ];
+  }
+
+  async getChatMessages(sessionName: string, chatId: string): Promise<Message[]> {
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    return [
       {
-        id: 10,
-        name: 'Marcos Souza',
-        lastMessage: 'Tenho disponibilidade à tarde',
-        time: '3 dias',
-        unread: 0,
-        tag: 'Agendamento',
-        avatar: 'MS',
+        id: '1',
+        body: 'Olá, tudo bem?',
+        from: '123456789',
+        to: 'me',
+        timestamp: Date.now() / 1000 - 3600,
+        hasMedia: false,
+        ack: 3,
+        fromMe: false,
+        type: 'chat',
       },
       {
-        id: 11,
-        name: 'Sandra Oliveira',
-        lastMessage: 'Muito obrigada pela atenção!',
-        time: '3 dias',
-        unread: 0,
-        tag: 'Concluído',
-        avatar: 'SO',
-      },
-      {
-        id: 12,
-        name: 'André Campos',
-        lastMessage: 'Preciso do laudo médico',
-        time: '4 dias',
-        unread: 1,
-        tag: 'Exames',
-        avatar: 'AC',
-      },
-      {
-        id: 13,
-        name: 'Juliana Braga',
-        lastMessage: 'Posso ir pela manhã?',
-        time: '4 dias',
-        unread: 0,
-        tag: 'Agendamento',
-        avatar: 'JB',
-      },
-      {
-        id: 14,
-        name: 'Thiago Melo',
-        lastMessage: 'Confirmei minha presença',
-        time: '5 dias',
-        unread: 0,
-        tag: 'Confirmado',
-        avatar: 'TM',
-      },
-      {
-        id: 15,
-        name: 'Vanessa Dias',
-        lastMessage: 'Quando sai o resultado?',
-        time: '5 dias',
-        unread: 2,
-        tag: 'Exames',
-        avatar: 'VD',
+        id: '2',
+        body: 'Tudo ótimo! E com você?',
+        from: 'me',
+        to: '123456789',
+        timestamp: Date.now() / 1000 - 3500,
+        hasMedia: false,
+        ack: 2,
+        fromMe: true,
+        type: 'chat',
       },
     ];
+  }
+
+  async getAllContacts(sessionName: string): Promise<Contact[]> {
+    return [];
+  }
+
+  async getPhoneNumberByLid(sessionName: string, lid: string): Promise<string | null> {
+    return null;
+  }
+
+  onNewMessage(callback: (message: any) => void): void {
+    // No-op for mock repository
+  }
+
+  removeMessageListener(callback: (message: any) => void): void {
+    // No-op for mock repository
   }
 }
