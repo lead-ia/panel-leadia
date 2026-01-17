@@ -7,6 +7,8 @@ import {
   MessageCircle,
   LayoutDashboard,
 } from "lucide-react";
+import { getAuth, signOut } from "firebase/auth";
+import { app } from "@/firebase";
 
 interface HeaderProps {
   currentPath: string | null;
@@ -29,6 +31,11 @@ export function Header({ currentPath, logo }: HeaderProps) {
       icon: Settings,
     },
   ];
+
+  function handleSignOut() {
+    const auth = getAuth(app);
+    signOut(auth);
+  }
 
   return (
     <header className="bg-gradient-to-r from-[#1e3a5f] via-[#2a5080] to-[#6eb5d8] border-b border-white/20">
@@ -71,7 +78,10 @@ export function Header({ currentPath, logo }: HeaderProps) {
               <span className="text-white">Julia Sousa</span>
             </div>
 
-            <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-all border border-white/20">
+            <button
+              onClick={handleSignOut}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-all border border-white/20"
+            >
               <LogOut className="w-4 h-4" />
               <span>Sair</span>
             </button>
