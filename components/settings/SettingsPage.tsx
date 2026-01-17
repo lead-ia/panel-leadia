@@ -1,46 +1,99 @@
-import { useState } from 'react';
-import { 
-  User, Building2, Link2, MessageSquare, Calendar, DollarSign, 
-  XCircle, Bell, TestTube2, ChevronDown, ChevronUp, Save, UserPlus, Users
-} from 'lucide-react';
+import { useState } from "react";
+import {
+  User,
+  Building2,
+  Link2,
+  MessageSquare,
+  Calendar,
+  DollarSign,
+  XCircle,
+  Bell,
+  TestTube2,
+  ChevronDown,
+  ChevronUp,
+  Save,
+  UserPlus,
+  Users,
+  Calendar1Icon,
+} from "lucide-react";
 
-type Section = 
-  | 'dados-basicos'
-  | 'dados-consultorio'
-  | 'canais'
-  | 'preferencias-ia'
-  | 'agenda'
-  | 'formas-pagamento'
-  | 'followup-lead'
-  | 'followup-paciente'
-  | 'lembretes'
-  | 'teste-ia';
+type Section =
+  | "dados-basicos"
+  | "dados-consultorio"
+  | "canais"
+  | "preferencias-ia"
+  | "agenda"
+  | "formas-pagamento"
+  | "followup-lead"
+  | "followup-paciente"
+  | "lembretes"
+  | "teste-ia";
 
 export function SettingsPage() {
-  const [expandedSection, setExpandedSection] = useState<Section | null>('dados-basicos');
+  const [expandedSection, setExpandedSection] = useState<Section | null>(
+    "dados-basicos",
+  );
 
   const toggleSection = (section: Section) => {
     setExpandedSection(expandedSection === section ? null : section);
   };
 
   const sections = [
-    { id: 'dados-basicos', title: '1. Dados básicos do médico', icon: User },
-    { id: 'dados-consultorio', title: '2. Dados de consultório', icon: Building2 },
-    { id: 'canais', title: '3. Integrações', icon: Link2 },
-    { id: 'preferencias-ia', title: '4. Preferências da IA e Comunicação', icon: MessageSquare },
-    { id: 'agenda', title: '5. Agenda e horários de atendimento', icon: Calendar },
-    { id: 'formas-pagamento', title: '6. Formas de pagamento', icon: DollarSign },
-    { id: 'followup-lead', title: '7. Follow-up de leads', icon: UserPlus },
-    { id: 'followup-paciente', title: '8. Follow-up de pacientes', icon: Users },
-    { id: 'lembretes', title: '9. Lembretes e confirmações', icon: Bell },
-    { id: 'teste-ia', title: '10. Teste da IA', icon: TestTube2 },
+    { id: "dados-basicos", title: "1. Dados básicos do médico", icon: User },
+    {
+      id: "dados-consultorio",
+      title: "2. Dados de consultório",
+      icon: Building2,
+    },
+    { id: "canais", title: "3. Integrações", icon: Link2 },
+    {
+      id: "preferencias-ia",
+      title: "4. Preferências da IA e Comunicação",
+      icon: MessageSquare,
+    },
+    {
+      id: "agenda",
+      title: "5. Agenda e horários de atendimento",
+      icon: Calendar,
+    },
+    {
+      id: "formas-pagamento",
+      title: "6. Formas de pagamento",
+      icon: DollarSign,
+    },
+    { id: "followup-lead", title: "7. Follow-up de leads", icon: UserPlus },
+    {
+      id: "followup-paciente",
+      title: "8. Follow-up de pacientes",
+      icon: Users,
+    },
+    { id: "lembretes", title: "9. Lembretes e confirmações", icon: Bell },
+    { id: "teste-ia", title: "10. Teste da IA", icon: TestTube2 },
   ];
+
+  function handleConnectCalendar() {
+    const endpoint = "http://localhost:5000/auth/google/login";
+    window.location.assign(endpoint);
+  }
 
   return (
     <div className="bg-white rounded-3xl shadow-2xl overflow-hidden h-full flex flex-col">
-      <div className="border-b border-gray-200 p-6 bg-white">
-        <h1 className="text-[#1e3a5f] text-2xl">Configurações</h1>
-        <p className="text-gray-600 mt-1">Gerencie as preferências e funcionalidades do sistema</p>
+      <div className="border-b border-gray-200 p-6 bg-white flex items-center">
+        <div className="flex-1 flex flex-col gap-y-2">
+          <h1 className="text-[#1e3a5f] text-2xl">Configurações</h1>
+          <p className="text-gray-600 mt-1">
+            Gerencie as preferências e funcionalidades do sistema
+          </p>
+        </div>
+        <div>
+          <button
+            onClick={handleConnectCalendar}
+            className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#1e3a5f] to-[#6eb5d8] text-white hover:shadow-lg transition-all flex items-center gap-2"
+          >
+            <Calendar1Icon className="w-5 h-5" />
+            Conectar Calendário
+          </button>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-6">
@@ -73,16 +126,24 @@ export function SettingsPage() {
 
                 {isExpanded && (
                   <div className="p-6 border-t border-gray-100">
-                    {section.id === 'dados-basicos' && <DadosBasicosSection />}
-                    {section.id === 'dados-consultorio' && <DadosConsultorioSection />}
-                    {section.id === 'canais' && <CanaisSection />}
-                    {section.id === 'preferencias-ia' && <PreferenciasIASection />}
-                    {section.id === 'agenda' && <AgendaSection />}
-                    {section.id === 'formas-pagamento' && <FormasPagamentoSection />}
-                    {section.id === 'followup-lead' && <FollowupLeadSection />}
-                    {section.id === 'followup-paciente' && <FollowupPacienteSection />}
-                    {section.id === 'lembretes' && <LembretesSection />}
-                    {section.id === 'teste-ia' && <TesteIASection />}
+                    {section.id === "dados-basicos" && <DadosBasicosSection />}
+                    {section.id === "dados-consultorio" && (
+                      <DadosConsultorioSection />
+                    )}
+                    {section.id === "canais" && <CanaisSection />}
+                    {section.id === "preferencias-ia" && (
+                      <PreferenciasIASection />
+                    )}
+                    {section.id === "agenda" && <AgendaSection />}
+                    {section.id === "formas-pagamento" && (
+                      <FormasPagamentoSection />
+                    )}
+                    {section.id === "followup-lead" && <FollowupLeadSection />}
+                    {section.id === "followup-paciente" && (
+                      <FollowupPacienteSection />
+                    )}
+                    {section.id === "lembretes" && <LembretesSection />}
+                    {section.id === "teste-ia" && <TesteIASection />}
                   </div>
                 )}
               </div>
@@ -109,7 +170,9 @@ function DadosBasicosSection() {
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm text-gray-700 mb-2">Nome completo *</label>
+          <label className="block text-sm text-gray-700 mb-2">
+            Nome completo *
+          </label>
           <input
             type="text"
             placeholder="Ex: Carolina Santos Silva"
@@ -117,7 +180,9 @@ function DadosBasicosSection() {
           />
         </div>
         <div>
-          <label className="block text-sm text-gray-700 mb-2">Nome para chamamento *</label>
+          <label className="block text-sm text-gray-700 mb-2">
+            Nome para chamamento *
+          </label>
           <input
             type="text"
             placeholder="Ex: Dra. Carolina"
@@ -128,7 +193,9 @@ function DadosBasicosSection() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm text-gray-700 mb-2">Especialidade *</label>
+          <label className="block text-sm text-gray-700 mb-2">
+            Especialidade *
+          </label>
           <input
             type="text"
             placeholder="Ex: Cardiologia"
@@ -136,7 +203,9 @@ function DadosBasicosSection() {
           />
         </div>
         <div>
-          <label className="block text-sm text-gray-700 mb-2">Subespecialidade (opcional)</label>
+          <label className="block text-sm text-gray-700 mb-2">
+            Subespecialidade (opcional)
+          </label>
           <input
             type="text"
             placeholder="Ex: Arritmia Cardíaca"
@@ -169,7 +238,9 @@ function DadosBasicosSection() {
       </div>
 
       <div>
-        <label className="block text-sm text-gray-700 mb-2">Foto profissional</label>
+        <label className="block text-sm text-gray-700 mb-2">
+          Foto profissional
+        </label>
         <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
           <p className="text-gray-500">Clique ou arraste uma imagem</p>
           <p className="text-xs text-gray-400 mt-1">PNG, JPG até 5MB</p>
@@ -177,7 +248,9 @@ function DadosBasicosSection() {
       </div>
 
       <div>
-        <label className="block text-sm text-gray-700 mb-2">Mini bio (opcional)</label>
+        <label className="block text-sm text-gray-700 mb-2">
+          Mini bio (opcional)
+        </label>
         <textarea
           rows={3}
           placeholder="Ex: Cardiologista com 15 anos de experiência, especializada em arritmias..."
@@ -192,7 +265,9 @@ function DadosConsultorioSection() {
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-sm text-gray-700 mb-2">Nome da clínica</label>
+        <label className="block text-sm text-gray-700 mb-2">
+          Nome da clínica
+        </label>
         <input
           type="text"
           placeholder="Ex: Clínica CardioVida"
@@ -201,7 +276,9 @@ function DadosConsultorioSection() {
       </div>
 
       <div>
-        <label className="block text-sm text-gray-700 mb-2">Endereço do consultório presencial</label>
+        <label className="block text-sm text-gray-700 mb-2">
+          Endereço do consultório presencial
+        </label>
         <input
           type="text"
           placeholder="Ex: Rua das Flores, 123 - Centro, São Paulo - SP"
@@ -210,7 +287,9 @@ function DadosConsultorioSection() {
       </div>
 
       <div>
-        <label className="block text-sm text-gray-700 mb-2">Link da consulta online</label>
+        <label className="block text-sm text-gray-700 mb-2">
+          Link da consulta online
+        </label>
         <input
           type="text"
           placeholder="Ex: https://meet.google.com/seu-link"
@@ -220,8 +299,13 @@ function DadosConsultorioSection() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label className="block text-sm text-gray-700 mb-2">Tempo padrão - Presencial</label>
-          <select defaultValue="60 minutos" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]">
+          <label className="block text-sm text-gray-700 mb-2">
+            Tempo padrão - Presencial
+          </label>
+          <select
+            defaultValue="60 minutos"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
+          >
             <option>15 minutos</option>
             <option>30 minutos</option>
             <option>45 minutos</option>
@@ -229,8 +313,13 @@ function DadosConsultorioSection() {
           </select>
         </div>
         <div>
-          <label className="block text-sm text-gray-700 mb-2">Tempo padrão - Online</label>
-          <select defaultValue="45 minutos" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]">
+          <label className="block text-sm text-gray-700 mb-2">
+            Tempo padrão - Online
+          </label>
+          <select
+            defaultValue="45 minutos"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
+          >
             <option>15 minutos</option>
             <option>30 minutos</option>
             <option>45 minutos</option>
@@ -253,7 +342,9 @@ function CanaisSection() {
             </div>
             <div>
               <p className="text-gray-800">WhatsApp Oficial</p>
-              <p className="text-xs text-gray-500">Conecte seu número para atendimento</p>
+              <p className="text-xs text-gray-500">
+                Conecte seu número para atendimento
+              </p>
             </div>
           </div>
           <button className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all">
@@ -263,7 +354,9 @@ function CanaisSection() {
       </div>
 
       <div>
-        <label className="block text-sm text-gray-700 mb-2">E-mail para notificações</label>
+        <label className="block text-sm text-gray-700 mb-2">
+          E-mail para notificações
+        </label>
         <input
           type="email"
           placeholder="contato@clinica.com.br"
@@ -279,7 +372,9 @@ function CanaisSection() {
             </div>
             <div>
               <p className="text-gray-800">Google Calendar</p>
-              <p className="text-xs text-gray-500">Sincronize sua agenda automaticamente</p>
+              <p className="text-xs text-gray-500">
+                Sincronize sua agenda automaticamente
+              </p>
             </div>
           </div>
           <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all">
@@ -296,10 +391,15 @@ function CanaisSection() {
             </div>
             <div>
               <p className="text-gray-800">Sistema de prontuário</p>
-              <p className="text-xs text-gray-500">Em breve - Integração via API</p>
+              <p className="text-xs text-gray-500">
+                Em breve - Integração via API
+              </p>
             </div>
           </div>
-          <button disabled className="px-4 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed">
+          <button
+            disabled
+            className="px-4 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed"
+          >
             Em breve
           </button>
         </div>
@@ -312,7 +412,9 @@ function PreferenciasIASection() {
   return (
     <div className="space-y-6">
       <div>
-        <label className="block text-sm text-gray-700 mb-2">Pergunta inicial personalizada</label>
+        <label className="block text-sm text-gray-700 mb-2">
+          Pergunta inicial personalizada
+        </label>
         <input
           type="text"
           placeholder="Ex: Poderia me contar o motivo da consulta?"
@@ -323,8 +425,17 @@ function PreferenciasIASection() {
       <div>
         <label className="block text-sm text-gray-700 mb-3">Tom desejado</label>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          {['Acolhedor', 'Formal', 'Minimalista', 'Técnico e objetivo', 'Humanizado com empatia'].map((tom) => (
-            <label key={tom} className="flex items-center gap-2 p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
+          {[
+            "Acolhedor",
+            "Formal",
+            "Minimalista",
+            "Técnico e objetivo",
+            "Humanizado com empatia",
+          ].map((tom) => (
+            <label
+              key={tom}
+              className="flex items-center gap-2 p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer"
+            >
               <input type="radio" name="tom" className="text-[#6eb5d8]" />
               <span className="text-sm">{tom}</span>
             </label>
@@ -333,34 +444,54 @@ function PreferenciasIASection() {
       </div>
 
       <div>
-        <label className="block text-sm text-gray-700 mb-3">Nível de personalização do acolhimento</label>
+        <label className="block text-sm text-gray-700 mb-3">
+          Nível de personalização do acolhimento
+        </label>
         <div className="space-y-2">
           <label className="flex items-center gap-2 p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-            <input type="radio" name="empatia" defaultChecked className="text-[#6eb5d8]" />
+            <input
+              type="radio"
+              name="empatia"
+              defaultChecked
+              className="text-[#6eb5d8]"
+            />
             <span className="text-sm">Empatia moderada (recomendado)</span>
           </label>
           <label className="flex items-center gap-2 p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
             <input type="radio" name="empatia" className="text-[#6eb5d8]" />
-            <span className="text-sm">Alta empatia (Psiquiatria, Ginecologia, etc.)</span>
+            <span className="text-sm">
+              Alta empatia (Psiquiatria, Ginecologia, etc.)
+            </span>
           </label>
         </div>
       </div>
 
       <div>
-        <label className="block text-sm text-gray-700 mb-3">Assuntos proibidos para a IA</label>
-        <p className="text-xs text-gray-500 mb-3">Por segurança, marque os tópicos que a IA NUNCA deve abordar:</p>
+        <label className="block text-sm text-gray-700 mb-3">
+          Assuntos proibidos para a IA
+        </label>
+        <p className="text-xs text-gray-500 mb-3">
+          Por segurança, marque os tópicos que a IA NUNCA deve abordar:
+        </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {[
-            'Diagnóstico',
-            'Exames',
-            'Medicamentos',
-            'Ajuste de doses',
-            'Classificação de gravidade',
-            'Comentários sobre laudos',
-            'Questões emocionais sensíveis'
+            "Diagnóstico",
+            "Exames",
+            "Medicamentos",
+            "Ajuste de doses",
+            "Classificação de gravidade",
+            "Comentários sobre laudos",
+            "Questões emocionais sensíveis",
           ].map((assunto) => (
-            <label key={assunto} className="flex items-center gap-2 p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-              <input type="checkbox" defaultChecked className="text-[#6eb5d8]" />
+            <label
+              key={assunto}
+              className="flex items-center gap-2 p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer"
+            >
+              <input
+                type="checkbox"
+                defaultChecked
+                className="text-[#6eb5d8]"
+              />
               <span className="text-sm">{assunto}</span>
             </label>
           ))}
@@ -368,7 +499,9 @@ function PreferenciasIASection() {
       </div>
 
       <div>
-        <label className="block text-sm text-gray-700 mb-2">Resposta padrão quando paciente faz perguntas clínicas</label>
+        <label className="block text-sm text-gray-700 mb-2">
+          Resposta padrão quando paciente faz perguntas clínicas
+        </label>
         <textarea
           rows={3}
           defaultValue="Sobre esse tipo de orientação, somente o médico pode te ajudar com segurança. Vamos agendar sua consulta?"
@@ -383,11 +516,20 @@ function AgendaSection() {
   return (
     <div className="space-y-6">
       <div>
-        <label className="block text-sm text-gray-700 mb-3">Tipos de serviço oferecidos</label>
+        <label className="block text-sm text-gray-700 mb-3">
+          Tipos de serviço oferecidos
+        </label>
         <div className="space-y-2">
-          {['Consulta presencial', 'Consulta online'].map((servico) => (
-            <label key={servico} className="flex items-center gap-2 p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-              <input type="checkbox" defaultChecked className="text-[#6eb5d8]" />
+          {["Consulta presencial", "Consulta online"].map((servico) => (
+            <label
+              key={servico}
+              className="flex items-center gap-2 p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer"
+            >
+              <input
+                type="checkbox"
+                defaultChecked
+                className="text-[#6eb5d8]"
+              />
               <span className="text-sm">{servico}</span>
             </label>
           ))}
@@ -395,13 +537,17 @@ function AgendaSection() {
       </div>
 
       <div className="border-t border-gray-200 pt-6">
-        <h3 className="text-gray-800 mb-4">Disponibilidade semanal - Consulta Online</h3>
-        
+        <h3 className="text-gray-800 mb-4">
+          Disponibilidade semanal - Consulta Online
+        </h3>
+
         <div className="space-y-4">
           <div>
-            <label className="block text-sm text-gray-700 mb-2">Dias disponíveis</label>
+            <label className="block text-sm text-gray-700 mb-2">
+              Dias disponíveis
+            </label>
             <div className="flex gap-2">
-              {['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'].map((dia) => (
+              {["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"].map((dia) => (
                 <label key={dia} className="flex-1">
                   <input type="checkbox" className="peer sr-only" />
                   <div className="p-3 text-center border border-gray-300 rounded-lg cursor-pointer peer-checked:bg-[#6eb5d8] peer-checked:text-white peer-checked:border-[#6eb5d8] hover:bg-gray-50 transition-all">
@@ -414,7 +560,9 @@ function AgendaSection() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-gray-700 mb-2">Horário de início</label>
+              <label className="block text-sm text-gray-700 mb-2">
+                Horário de início
+              </label>
               <input
                 type="time"
                 defaultValue="08:00"
@@ -422,7 +570,9 @@ function AgendaSection() {
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-700 mb-2">Horário de término</label>
+              <label className="block text-sm text-gray-700 mb-2">
+                Horário de término
+              </label>
               <input
                 type="time"
                 defaultValue="18:00"
@@ -433,7 +583,9 @@ function AgendaSection() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-gray-700 mb-2">Intervalo entre consultas</label>
+              <label className="block text-sm text-gray-700 mb-2">
+                Intervalo entre consultas
+              </label>
               <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]">
                 <option>15 minutos</option>
                 <option>30 minutos</option>
@@ -442,7 +594,9 @@ function AgendaSection() {
               </select>
             </div>
             <div>
-              <label className="block text-sm text-gray-700 mb-2">Virada de agenda (dias à frente)</label>
+              <label className="block text-sm text-gray-700 mb-2">
+                Virada de agenda (dias à frente)
+              </label>
               <input
                 type="number"
                 defaultValue="30"
@@ -456,13 +610,17 @@ function AgendaSection() {
       </div>
 
       <div className="border-t border-gray-200 pt-6">
-        <h3 className="text-gray-800 mb-4">Disponibilidade semanal - Consulta Presencial</h3>
-        
+        <h3 className="text-gray-800 mb-4">
+          Disponibilidade semanal - Consulta Presencial
+        </h3>
+
         <div className="space-y-4">
           <div>
-            <label className="block text-sm text-gray-700 mb-2">Dias disponíveis</label>
+            <label className="block text-sm text-gray-700 mb-2">
+              Dias disponíveis
+            </label>
             <div className="flex gap-2">
-              {['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'].map((dia) => (
+              {["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"].map((dia) => (
                 <label key={dia} className="flex-1">
                   <input type="checkbox" className="peer sr-only" />
                   <div className="p-3 text-center border border-gray-300 rounded-lg cursor-pointer peer-checked:bg-[#6eb5d8] peer-checked:text-white peer-checked:border-[#6eb5d8] hover:bg-gray-50 transition-all">
@@ -475,7 +633,9 @@ function AgendaSection() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-gray-700 mb-2">Horário de início</label>
+              <label className="block text-sm text-gray-700 mb-2">
+                Horário de início
+              </label>
               <input
                 type="time"
                 defaultValue="08:00"
@@ -483,7 +643,9 @@ function AgendaSection() {
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-700 mb-2">Horário de término</label>
+              <label className="block text-sm text-gray-700 mb-2">
+                Horário de término
+              </label>
               <input
                 type="time"
                 defaultValue="18:00"
@@ -494,7 +656,9 @@ function AgendaSection() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-gray-700 mb-2">Intervalo entre consultas</label>
+              <label className="block text-sm text-gray-700 mb-2">
+                Intervalo entre consultas
+              </label>
               <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]">
                 <option>15 minutos</option>
                 <option>30 minutos</option>
@@ -503,7 +667,9 @@ function AgendaSection() {
               </select>
             </div>
             <div>
-              <label className="block text-sm text-gray-700 mb-2">Virada de agenda (dias à frente)</label>
+              <label className="block text-sm text-gray-700 mb-2">
+                Virada de agenda (dias à frente)
+              </label>
               <input
                 type="number"
                 defaultValue="30"
@@ -531,7 +697,9 @@ function FormasPagamentoSection() {
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm text-gray-700 mb-2">Valor da consulta online</label>
+          <label className="block text-sm text-gray-700 mb-2">
+            Valor da consulta online
+          </label>
           <input
             type="text"
             placeholder="R$ 300,00"
@@ -539,7 +707,9 @@ function FormasPagamentoSection() {
           />
         </div>
         <div>
-          <label className="block text-sm text-gray-700 mb-2">Valor da consulta presencial</label>
+          <label className="block text-sm text-gray-700 mb-2">
+            Valor da consulta presencial
+          </label>
           <input
             type="text"
             placeholder="R$ 400,00"
@@ -549,10 +719,20 @@ function FormasPagamentoSection() {
       </div>
 
       <div>
-        <label className="block text-sm text-gray-700 mb-3">Forma de pagamento aceita</label>
+        <label className="block text-sm text-gray-700 mb-3">
+          Forma de pagamento aceita
+        </label>
         <div className="space-y-2">
-          {['PIX', 'Cartão de crédito', 'Cartão de débito', 'Link de pagamento externo'].map((forma) => (
-            <label key={forma} className="flex items-center gap-2 p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
+          {[
+            "PIX",
+            "Cartão de crédito",
+            "Cartão de débito",
+            "Link de pagamento externo",
+          ].map((forma) => (
+            <label
+              key={forma}
+              className="flex items-center gap-2 p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer"
+            >
               <input type="checkbox" className="text-[#6eb5d8]" />
               <span className="text-sm">{forma}</span>
             </label>
@@ -568,10 +748,14 @@ function FollowupLeadSection() {
     <div className="space-y-6">
       <div className="border border-gray-200 rounded-lg p-5 bg-blue-50">
         <h3 className="text-[#1e3a5f] mb-4">Texto de orientações básicas</h3>
-        <p className="text-xs text-gray-500 mb-3">Enviar assim que confirmar a consulta</p>
-        
+        <p className="text-xs text-gray-500 mb-3">
+          Enviar assim que confirmar a consulta
+        </p>
+
         <div>
-          <label className="block text-sm text-gray-700 mb-2">Mensagem personalizada</label>
+          <label className="block text-sm text-gray-700 mb-2">
+            Mensagem personalizada
+          </label>
           <textarea
             rows={4}
             placeholder="Ex: Sua consulta está confirmada! Lembre-se de chegar com 10 minutos de antecedência."
@@ -580,9 +764,13 @@ function FollowupLeadSection() {
         </div>
 
         <div className="mt-4">
-          <label className="block text-sm text-gray-700 mb-2">Anexar arquivo PDF</label>
+          <label className="block text-sm text-gray-700 mb-2">
+            Anexar arquivo PDF
+          </label>
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-[#6eb5d8] transition-colors cursor-pointer">
-            <p className="text-sm text-gray-500">Clique ou arraste um arquivo PDF</p>
+            <p className="text-sm text-gray-500">
+              Clique ou arraste um arquivo PDF
+            </p>
             <p className="text-xs text-gray-400 mt-1">Máximo 5MB</p>
           </div>
         </div>
@@ -590,10 +778,14 @@ function FollowupLeadSection() {
 
       <div className="border border-gray-200 rounded-lg p-5 bg-green-50">
         <h3 className="text-[#1e3a5f] mb-4">Orientações de pré consulta</h3>
-        <p className="text-xs text-gray-500 mb-3">Enviar assim que confirmar a presença</p>
-        
+        <p className="text-xs text-gray-500 mb-3">
+          Enviar assim que confirmar a presença
+        </p>
+
         <div>
-          <label className="block text-sm text-gray-700 mb-2">Mensagem personalizada</label>
+          <label className="block text-sm text-gray-700 mb-2">
+            Mensagem personalizada
+          </label>
           <textarea
             rows={4}
             placeholder="Ex: Olá! Para a sua consulta de amanhã, por favor traga seus exames anteriores e documentos."
@@ -602,9 +794,13 @@ function FollowupLeadSection() {
         </div>
 
         <div className="mt-4">
-          <label className="block text-sm text-gray-700 mb-2">Anexar arquivo PDF</label>
+          <label className="block text-sm text-gray-700 mb-2">
+            Anexar arquivo PDF
+          </label>
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-[#6eb5d8] transition-colors cursor-pointer">
-            <p className="text-sm text-gray-500">Clique ou arraste um arquivo PDF</p>
+            <p className="text-sm text-gray-500">
+              Clique ou arraste um arquivo PDF
+            </p>
             <p className="text-xs text-gray-400 mt-1">Máximo 5MB</p>
           </div>
         </div>
@@ -619,8 +815,12 @@ function FollowupPacienteSection() {
       <div className="border border-gray-200 rounded-lg p-5 bg-purple-50">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-[#1e3a5f]">Relembrar paciente para próxima consulta</h3>
-            <p className="text-xs text-gray-500 mt-1">Enviar lembrete automático periodicamente</p>
+            <h3 className="text-[#1e3a5f]">
+              Relembrar paciente para próxima consulta
+            </h3>
+            <p className="text-xs text-gray-500 mt-1">
+              Enviar lembrete automático periodicamente
+            </p>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
             <input type="checkbox" className="sr-only peer" />
@@ -630,7 +830,9 @@ function FollowupPacienteSection() {
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm text-gray-700 mb-2">Enviar a cada quantos dias</label>
+            <label className="block text-sm text-gray-700 mb-2">
+              Enviar a cada quantos dias
+            </label>
             <input
               type="number"
               defaultValue="30"
@@ -642,13 +844,17 @@ function FollowupPacienteSection() {
           </div>
 
           <div>
-            <label className="block text-sm text-gray-700 mb-2">Mensagem personalizada</label>
+            <label className="block text-sm text-gray-700 mb-2">
+              Mensagem personalizada
+            </label>
             <textarea
               rows={4}
               defaultValue="Olá [NOME]! Faz tempo que não nos vemos. Que tal agendar uma consulta de acompanhamento?"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
             />
-            <p className="text-xs text-gray-500 mt-1">Use [NOME] para inserir o nome do paciente</p>
+            <p className="text-xs text-gray-500 mt-1">
+              Use [NOME] para inserir o nome do paciente
+            </p>
           </div>
         </div>
       </div>
@@ -663,7 +869,9 @@ function LembretesSection() {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-[#1e3a5f]">Lembrete automático (24h antes)</h3>
-            <p className="text-xs text-gray-500 mt-1">Enviar lembrete aos pacientes</p>
+            <p className="text-xs text-gray-500 mt-1">
+              Enviar lembrete aos pacientes
+            </p>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
             <input type="checkbox" defaultChecked className="sr-only peer" />
@@ -671,7 +879,9 @@ function LembretesSection() {
           </label>
         </div>
         <div>
-          <label className="block text-sm text-gray-700 mb-2">Texto customizável</label>
+          <label className="block text-sm text-gray-700 mb-2">
+            Texto customizável
+          </label>
           <textarea
             rows={3}
             defaultValue="Olá! Esta é uma lembrança da sua consulta marcada para amanhã às [HORÁRIO] com [MÉDICO]. Confirma sua presença?"
@@ -684,7 +894,9 @@ function LembretesSection() {
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-[#1e3a5f]">Confirmação automática no dia</h3>
-            <p className="text-xs text-gray-500 mt-1">Pedir confirmação no dia da consulta</p>
+            <p className="text-xs text-gray-500 mt-1">
+              Pedir confirmação no dia da consulta
+            </p>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
             <input type="checkbox" defaultChecked className="sr-only peer" />
@@ -698,22 +910,32 @@ function LembretesSection() {
 
 function TesteIASection() {
   const [messages, setMessages] = useState([
-    { id: 1, text: 'Olá! Sou a assistente virtual da Dra. Carolina. Como posso te ajudar?', sender: 'ia' }
+    {
+      id: 1,
+      text: "Olá! Sou a assistente virtual da Dra. Carolina. Como posso te ajudar?",
+      sender: "ia",
+    },
   ]);
-  const [inputMessage, setInputMessage] = useState('');
+  const [inputMessage, setInputMessage] = useState("");
 
   const sendMessage = () => {
     if (inputMessage.trim()) {
-      setMessages([...messages, { id: messages.length + 1, text: inputMessage, sender: 'user' }]);
-      setInputMessage('');
-      
+      setMessages([
+        ...messages,
+        { id: messages.length + 1, text: inputMessage, sender: "user" },
+      ]);
+      setInputMessage("");
+
       // Simular resposta da IA
       setTimeout(() => {
-        setMessages(prev => [...prev, {
-          id: prev.length + 1,
-          text: 'Entendi! Vou te ajudar com isso. Você gostaria de agendar uma consulta?',
-          sender: 'ia'
-        }]);
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: prev.length + 1,
+            text: "Entendi! Vou te ajudar com isso. Você gostaria de agendar uma consulta?",
+            sender: "ia",
+          },
+        ]);
       }, 1000);
     }
   };
@@ -722,7 +944,9 @@ function TesteIASection() {
     <div className="space-y-4">
       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
         <p className="text-sm text-yellow-800">
-          <strong>💡 Dica:</strong> Teste diferentes cenários de conversa antes de ativar a IA no seu consultório. Simule perguntas clínicas, agendamentos e cancelamentos.
+          <strong>💡 Dica:</strong> Teste diferentes cenários de conversa antes
+          de ativar a IA no seu consultório. Simule perguntas clínicas,
+          agendamentos e cancelamentos.
         </p>
       </div>
 
@@ -735,13 +959,13 @@ function TesteIASection() {
           {messages.map((msg) => (
             <div
               key={msg.id}
-              className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+              className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
             >
               <div
                 className={`max-w-xs px-4 py-2 rounded-lg ${
-                  msg.sender === 'user'
-                    ? 'bg-[#6eb5d8] text-white'
-                    : 'bg-white text-gray-800 border border-gray-200'
+                  msg.sender === "user"
+                    ? "bg-[#6eb5d8] text-white"
+                    : "bg-white text-gray-800 border border-gray-200"
                 }`}
               >
                 <p className="text-sm">{msg.text}</p>
@@ -755,7 +979,7 @@ function TesteIASection() {
             type="text"
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+            onKeyPress={(e) => e.key === "Enter" && sendMessage()}
             placeholder="Digite uma mensagem de teste..."
             className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
           />
