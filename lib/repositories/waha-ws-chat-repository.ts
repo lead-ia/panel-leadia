@@ -1,12 +1,13 @@
 import axios from 'axios';
 import { format } from 'date-fns';
 import { Conversation, IChatRepository, Message, Contact } from './chat-repository';
+import { WahaWebsocket } from '../waha-websocket';
 
 export class WahaWsChatRepository implements IChatRepository {
   private sessionName: string;
   private apiUrl: string;
   private wsUrl: string;
-  private socket: WebSocket | null = null;
+  private websocket: WahaWebsocket;
   private messageListeners: ((message: any) => void)[] = [];
 
   constructor(
@@ -17,47 +18,18 @@ export class WahaWsChatRepository implements IChatRepository {
     this.sessionName = sessionName;
     this.apiUrl = apiUrl;
     this.wsUrl = wsUrl;
-    this.connect();
+    this.websocket = WahaWebsocket.getInstance(sessionName, wsUrl);
+    this.setupListeners();
   }
 
-  private connect() {
-    if (typeof window === 'undefined') return; // Ensure we are in the browser
-
-    const session = this.sessionName; // Using sessionName to match HTTP API usage
-    const events = ['message'];
-    const apiKey = process.env.NEXT_PUBLIC_WAHA_API_KEY || process.env.WAHA_API_KEY || '';
-
-    const queryParams = new URLSearchParams({
-      'x-api-key': apiKey,
-      session,
-      ...events.reduce((acc, event) => ({ ...acc, events: event }), {})
-    });
-
-    const fullWsUrl = `${this.wsUrl}?${queryParams.toString()}`;
-
-    this.socket = new WebSocket(fullWsUrl);
-
-    this.socket.onopen = () => {
-      console.log('WebSocket connection established:', fullWsUrl);
-    };
-
-    this.socket.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
+  private setupListeners() {
+    this.websocket.on('message', (data: any) => {
+        // The data from websocket might be wrapped or raw, depending on Waha version.
+        // Based on previous implementation: const data = JSON.parse(event.data); this.notifyListeners(data);
+        // And WahaWebsocket parses JSON and emits 'message' event with the data.
+        // So 'data' here is the parsed payload.
         this.notifyListeners(data);
-      } catch (error) {
-        console.error('Error parsing WebSocket message:', error);
-      }
-    };
-
-    this.socket.onerror = (error) => {
-      console.error('WebSocket Error:', error);
-    };
-
-    this.socket.onclose = () => {
-      console.log('WebSocket connection closed');
-      // Optional: Implement reconnection logic here
-    };
+    });
   }
 
   public onNewMessage(callback: (message: any) => void) {
