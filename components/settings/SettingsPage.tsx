@@ -71,9 +71,24 @@ export function SettingsPage() {
     { id: "teste-ia", title: "10. Teste da IA", icon: TestTube2 },
   ];
 
-  function handleConnectCalendar() {
-    const endpoint = "http://localhost:5000/auth/google/login";
-    window.location.assign(endpoint);
+  async function handleConnectCalendar() {
+    try {
+      const response = await fetch("/api/calendar/oauth/start");
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Erro ao iniciar conexão");
+      }
+
+      if (data.auth_url) {
+        window.location.href = data.auth_url;
+      } else {
+        throw new Error("URL de autorização não recebida");
+      }
+    } catch (error) {
+      console.error("Erro ao conectar calendário:", error);
+      alert("Erro ao conectar calendário. Tente novamente.");
+    }
   }
 
   return (
@@ -962,11 +977,10 @@ function TesteIASection() {
               className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`max-w-xs px-4 py-2 rounded-lg ${
-                  msg.sender === "user"
+                className={`max-w-xs px-4 py-2 rounded-lg ${msg.sender === "user"
                     ? "bg-[#6eb5d8] text-white"
                     : "bg-white text-gray-800 border border-gray-200"
-                }`}
+                  }`}
               >
                 <p className="text-sm">{msg.text}</p>
               </div>
