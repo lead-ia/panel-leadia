@@ -14,11 +14,22 @@ import {
   Save,
   UserPlus,
   Users,
-  Calendar1Icon,
+  Loader2,
 } from "lucide-react";
-import { handleClientScriptLoad } from "next/script";
-import { useUser } from "@/components/auth/user-context";
+import { useSettings } from "@/hooks/use-settings";
+import { Settings } from "@/types/settings";
 
+type Section =
+  | "dados-basicos"
+  | "dados-consultorio"
+  | "canais"
+  | "preferencias-ia"
+  | "agenda"
+  | "formas-pagamento"
+  | "followup-lead"
+  | "followup-paciente"
+  | "lembretes"
+  | "teste-ia";
 type Section =
   | "dados-basicos"
   | "dados-consultorio"
@@ -32,9 +43,27 @@ type Section =
   | "teste-ia";
 
 export function SettingsPage() {
+  const { settings, loading, error, updateSettings, upsertStatus } =
+    useSettings();
   const [expandedSection, setExpandedSection] = useState<Section | null>(
     "dados-basicos",
   );
+
+  if (loading) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-[#1e3a5f]" />
+      </div>
+    );
+  }
+
+  if (error || !settings) {
+    return (
+      <div className="h-full flex items-center justify-center text-red-500">
+        Erro ao carregar configurações. Tente novamente.
+      </div>
+    );
+  }
 
   const toggleSection = (section: Section) => {
     setExpandedSection(expandedSection === section ? null : section);
@@ -71,17 +100,45 @@ export function SettingsPage() {
     },
     { id: "lembretes", title: "9. Lembretes e confirmações", icon: Bell },
     { id: "teste-ia", title: "10. Teste da IA", icon: TestTube2 },
+    { id: "dados-basicos", title: "1. Dados básicos do médico", icon: User },
+    {
+      id: "dados-consultorio",
+      title: "2. Dados de consultório",
+      icon: Building2,
+    },
+    { id: "canais", title: "3. Integrações", icon: Link2 },
+    {
+      id: "preferencias-ia",
+      title: "4. Preferências da IA e Comunicação",
+      icon: MessageSquare,
+    },
+    {
+      id: "agenda",
+      title: "5. Agenda e horários de atendimento",
+      icon: Calendar,
+    },
+    {
+      id: "formas-pagamento",
+      title: "6. Formas de pagamento",
+      icon: DollarSign,
+    },
+    { id: "followup-lead", title: "7. Follow-up de leads", icon: UserPlus },
+    {
+      id: "followup-paciente",
+      title: "8. Follow-up de pacientes",
+      icon: Users,
+    },
+    { id: "lembretes", title: "9. Lembretes e confirmações", icon: Bell },
+    { id: "teste-ia", title: "10. Teste da IA", icon: TestTube2 },
   ];
 
   return (
     <div className="bg-white rounded-3xl shadow-2xl overflow-hidden h-full flex flex-col">
-      <div className="border-b border-gray-200 p-6 bg-white flex items-center">
-        <div className="flex flex-col gap-y-2">
-          <h1 className="text-[#1e3a5f] text-2xl">Configurações</h1>
-          <p className="text-gray-600 mt-1">
-            Gerencie as preferências e funcionalidades do sistema
-          </p>
-        </div>
+      <div className="border-b border-gray-200 p-6 bg-white">
+        <h1 className="text-[#1e3a5f] text-2xl">Configurações</h1>
+        <p className="text-gray-600 mt-1">
+          Gerencie as preferências e funcionalidades do sistema
+        </p>
       </div>
 
       <div className="flex-1 overflow-y-auto p-6">
@@ -114,23 +171,33 @@ export function SettingsPage() {
 
                 {isExpanded && (
                   <div className="p-6 border-t border-gray-100">
-                    {section.id === "dados-basicos" && <DadosBasicosSection />}
+                    {section.id === "dados-basicos" && (
+                      <DadosBasicosSection data={settings.basicInfo} />
+                    )}
                     {section.id === "dados-consultorio" && (
-                      <DadosConsultorioSection />
+                      <DadosConsultorioSection data={settings.clinicInfo} />
                     )}
                     {section.id === "canais" && <CanaisSection />}
                     {section.id === "preferencias-ia" && (
-                      <PreferenciasIASection />
+                      <PreferenciasIASection data={settings.aiPreferences} />
                     )}
-                    {section.id === "agenda" && <AgendaSection />}
+                    {section.id === "agenda" && (
+                      <AgendaSection data={settings.availability} />
+                    )}
                     {section.id === "formas-pagamento" && (
-                      <FormasPagamentoSection />
+                      <FormasPagamentoSection data={settings.paymentMethods} />
                     )}
-                    {section.id === "followup-lead" && <FollowupLeadSection />}
+                    {section.id === "followup-lead" && (
+                      <FollowupLeadSection data={settings.leadFollowUpInfo} />
+                    )}
                     {section.id === "followup-paciente" && (
-                      <FollowupPacienteSection />
+                      <FollowupPacienteSection
+                        data={settings.patientFollowUpInfo}
+                      />
                     )}
-                    {section.id === "lembretes" && <LembretesSection />}
+                    {section.id === "lembretes" && (
+                      <LembretesSection data={settings.reminderInfo} />
+                    )}
                     {section.id === "teste-ia" && <TesteIASection />}
                   </div>
                 )}
@@ -142,9 +209,19 @@ export function SettingsPage() {
             <button className="px-6 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 transition-all">
               Cancelar
             </button>
-            <button className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#1e3a5f] to-[#6eb5d8] text-white hover:shadow-lg transition-all flex items-center gap-2">
-              <Save className="w-5 h-5" />
-              Salvar Configurações
+            <button
+              onClick={() => updateSettings(settings)}
+              disabled={upsertStatus === "loading"}
+              className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#1e3a5f] to-[#6eb5d8] text-white hover:shadow-lg transition-all flex items-center gap-2 disabled:opacity-70"
+            >
+              {upsertStatus === "loading" ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <Save className="w-5 h-5" />
+              )}
+              {upsertStatus === "loading"
+                ? "Salvando..."
+                : "Salvar Configurações"}
             </button>
           </div>
         </div>
@@ -153,7 +230,7 @@ export function SettingsPage() {
   );
 }
 
-function DadosBasicosSection() {
+function DadosBasicosSection({ data }: { data: Settings["basicInfo"] }) {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -161,8 +238,12 @@ function DadosBasicosSection() {
           <label className="block text-sm text-gray-700 mb-2">
             Nome completo *
           </label>
+          <label className="block text-sm text-gray-700 mb-2">
+            Nome completo *
+          </label>
           <input
             type="text"
+            defaultValue={data.fullName}
             placeholder="Ex: Carolina Santos Silva"
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
           />
@@ -171,8 +252,12 @@ function DadosBasicosSection() {
           <label className="block text-sm text-gray-700 mb-2">
             Nome para chamamento *
           </label>
+          <label className="block text-sm text-gray-700 mb-2">
+            Nome para chamamento *
+          </label>
           <input
             type="text"
+            defaultValue={data.displayName}
             placeholder="Ex: Dra. Carolina"
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
           />
@@ -184,8 +269,12 @@ function DadosBasicosSection() {
           <label className="block text-sm text-gray-700 mb-2">
             Especialidade *
           </label>
+          <label className="block text-sm text-gray-700 mb-2">
+            Especialidade *
+          </label>
           <input
             type="text"
+            defaultValue={data.specialty}
             placeholder="Ex: Cardiologia"
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
           />
@@ -194,8 +283,12 @@ function DadosBasicosSection() {
           <label className="block text-sm text-gray-700 mb-2">
             Subespecialidade (opcional)
           </label>
+          <label className="block text-sm text-gray-700 mb-2">
+            Subespecialidade (opcional)
+          </label>
           <input
             type="text"
+            defaultValue={data.subspecialty}
             placeholder="Ex: Arritmia Cardíaca"
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
           />
@@ -207,13 +300,17 @@ function DadosBasicosSection() {
           <label className="block text-sm text-gray-700 mb-2">CRM *</label>
           <input
             type="text"
+            defaultValue={data.crm}
             placeholder="Ex: 123456"
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
           />
         </div>
         <div>
           <label className="block text-sm text-gray-700 mb-2">UF *</label>
-          <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]">
+          <select
+            defaultValue={data.uf}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
+          >
             <option>Selecione</option>
             <option>SP</option>
             <option>RJ</option>
@@ -229,6 +326,9 @@ function DadosBasicosSection() {
         <label className="block text-sm text-gray-700 mb-2">
           Foto profissional
         </label>
+        <label className="block text-sm text-gray-700 mb-2">
+          Foto profissional
+        </label>
         <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
           <p className="text-gray-500">Clique ou arraste uma imagem</p>
           <p className="text-xs text-gray-400 mt-1">PNG, JPG até 5MB</p>
@@ -239,8 +339,12 @@ function DadosBasicosSection() {
         <label className="block text-sm text-gray-700 mb-2">
           Mini bio (opcional)
         </label>
+        <label className="block text-sm text-gray-700 mb-2">
+          Mini bio (opcional)
+        </label>
         <textarea
           rows={3}
+          defaultValue={data.bio}
           placeholder="Ex: Cardiologista com 15 anos de experiência, especializada em arritmias..."
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
         />
@@ -249,15 +353,19 @@ function DadosBasicosSection() {
   );
 }
 
-function DadosConsultorioSection() {
+function DadosConsultorioSection({ data }: { data: Settings["clinicInfo"] }) {
   return (
     <div className="space-y-4">
       <div>
         <label className="block text-sm text-gray-700 mb-2">
           Nome da clínica
         </label>
+        <label className="block text-sm text-gray-700 mb-2">
+          Nome da clínica
+        </label>
         <input
           type="text"
+          defaultValue={data.clinicName}
           placeholder="Ex: Clínica CardioVida"
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
         />
@@ -267,8 +375,12 @@ function DadosConsultorioSection() {
         <label className="block text-sm text-gray-700 mb-2">
           Endereço do consultório presencial
         </label>
+        <label className="block text-sm text-gray-700 mb-2">
+          Endereço do consultório presencial
+        </label>
         <input
           type="text"
+          defaultValue={data.address}
           placeholder="Ex: Rua das Flores, 123 - Centro, São Paulo - SP"
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
         />
@@ -278,8 +390,12 @@ function DadosConsultorioSection() {
         <label className="block text-sm text-gray-700 mb-2">
           Link da consulta online
         </label>
+        <label className="block text-sm text-gray-700 mb-2">
+          Link da consulta online
+        </label>
         <input
           type="text"
+          defaultValue={data.onlineConsultationLink}
           placeholder="Ex: https://meet.google.com/seu-link"
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
         />
@@ -291,7 +407,7 @@ function DadosConsultorioSection() {
             Tempo padrão - Presencial
           </label>
           <select
-            defaultValue="60 minutos"
+            defaultValue={data.standardDurationInPerson}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
           >
             <option>15 minutos</option>
@@ -305,7 +421,7 @@ function DadosConsultorioSection() {
             Tempo padrão - Online
           </label>
           <select
-            defaultValue="45 minutos"
+            defaultValue={data.standardDurationOnline}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
           >
             <option>15 minutos</option>
@@ -359,6 +475,9 @@ function CanaisSection() {
               <p className="text-xs text-gray-500">
                 Conecte seu número para atendimento
               </p>
+              <p className="text-xs text-gray-500">
+                Conecte seu número para atendimento
+              </p>
             </div>
           </div>
           <button className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all">
@@ -368,6 +487,9 @@ function CanaisSection() {
       </div>
 
       <div>
+        <label className="block text-sm text-gray-700 mb-2">
+          E-mail para notificações
+        </label>
         <label className="block text-sm text-gray-700 mb-2">
           E-mail para notificações
         </label>
@@ -386,6 +508,9 @@ function CanaisSection() {
             </div>
             <div>
               <p className="text-gray-800">Google Calendar</p>
+              <p className="text-xs text-gray-500">
+                Sincronize sua agenda automaticamente
+              </p>
               <p className="text-xs text-gray-500">
                 Sincronize sua agenda automaticamente
               </p>
@@ -411,8 +536,15 @@ function CanaisSection() {
               <p className="text-xs text-gray-500">
                 Em breve - Integração via API
               </p>
+              <p className="text-xs text-gray-500">
+                Em breve - Integração via API
+              </p>
             </div>
           </div>
+          <button
+            disabled
+            className="px-4 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed"
+          >
           <button
             disabled
             className="px-4 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed"
@@ -425,15 +557,19 @@ function CanaisSection() {
   );
 }
 
-function PreferenciasIASection() {
+function PreferenciasIASection({ data }: { data: Settings["aiPreferences"] }) {
   return (
     <div className="space-y-6">
       <div>
         <label className="block text-sm text-gray-700 mb-2">
           Pergunta inicial personalizada
         </label>
+        <label className="block text-sm text-gray-700 mb-2">
+          Pergunta inicial personalizada
+        </label>
         <input
           type="text"
+          defaultValue={data.initialQuestion}
           placeholder="Ex: Poderia me contar o motivo da consulta?"
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
         />
@@ -453,7 +589,12 @@ function PreferenciasIASection() {
               key={tom}
               className="flex items-center gap-2 p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer"
             >
-              <input type="radio" name="tom" className="text-[#6eb5d8]" />
+              <input
+                type="radio"
+                name="tom"
+                defaultChecked={data.tone === tom}
+                className="text-[#6eb5d8]"
+              />
               <span className="text-sm">{tom}</span>
             </label>
           ))}
@@ -464,18 +605,31 @@ function PreferenciasIASection() {
         <label className="block text-sm text-gray-700 mb-3">
           Nível de personalização do acolhimento
         </label>
+        <label className="block text-sm text-gray-700 mb-3">
+          Nível de personalização do acolhimento
+        </label>
         <div className="space-y-2">
           <label className="flex items-center gap-2 p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
             <input
               type="radio"
               name="empatia"
-              defaultChecked
+              defaultChecked={
+                data.empathyLevel === "Empatia moderada (recomendado)"
+              }
               className="text-[#6eb5d8]"
             />
             <span className="text-sm">Empatia moderada (recomendado)</span>
           </label>
           <label className="flex items-center gap-2 p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-            <input type="radio" name="empatia" className="text-[#6eb5d8]" />
+            <input
+              type="radio"
+              name="empatia"
+              defaultChecked={
+                data.empathyLevel ===
+                "Alta empatia (Psiquiatria, Ginecologia, etc.)"
+              }
+              className="text-[#6eb5d8]"
+            />
             <span className="text-sm">
               Alta empatia (Psiquiatria, Ginecologia, etc.)
             </span>
@@ -484,6 +638,12 @@ function PreferenciasIASection() {
       </div>
 
       <div>
+        <label className="block text-sm text-gray-700 mb-3">
+          Assuntos proibidos para a IA
+        </label>
+        <p className="text-xs text-gray-500 mb-3">
+          Por segurança, marque os tópicos que a IA NUNCA deve abordar:
+        </p>
         <label className="block text-sm text-gray-700 mb-3">
           Assuntos proibidos para a IA
         </label>
@@ -499,6 +659,13 @@ function PreferenciasIASection() {
             "Classificação de gravidade",
             "Comentários sobre laudos",
             "Questões emocionais sensíveis",
+            "Diagnóstico",
+            "Exames",
+            "Medicamentos",
+            "Ajuste de doses",
+            "Classificação de gravidade",
+            "Comentários sobre laudos",
+            "Questões emocionais sensíveis",
           ].map((assunto) => (
             <label
               key={assunto}
@@ -506,7 +673,7 @@ function PreferenciasIASection() {
             >
               <input
                 type="checkbox"
-                defaultChecked
+                defaultChecked={data.forbiddenTopics.includes(assunto)}
                 className="text-[#6eb5d8]"
               />
               <span className="text-sm">{assunto}</span>
@@ -519,9 +686,12 @@ function PreferenciasIASection() {
         <label className="block text-sm text-gray-700 mb-2">
           Resposta padrão quando paciente faz perguntas clínicas
         </label>
+        <label className="block text-sm text-gray-700 mb-2">
+          Resposta padrão quando paciente faz perguntas clínicas
+        </label>
         <textarea
           rows={3}
-          defaultValue="Sobre esse tipo de orientação, somente o médico pode te ajudar com segurança. Vamos agendar sua consulta?"
+          defaultValue={data.clinicalResponse}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
         />
       </div>
@@ -529,10 +699,13 @@ function PreferenciasIASection() {
   );
 }
 
-function AgendaSection() {
+function AgendaSection({ data }: { data: Settings["availability"] }) {
   return (
     <div className="space-y-6">
       <div>
+        <label className="block text-sm text-gray-700 mb-3">
+          Tipos de serviço oferecidos
+        </label>
         <label className="block text-sm text-gray-700 mb-3">
           Tipos de serviço oferecidos
         </label>
@@ -544,7 +717,7 @@ function AgendaSection() {
             >
               <input
                 type="checkbox"
-                defaultChecked
+                defaultChecked={data.services.includes(servico)}
                 className="text-[#6eb5d8]"
               />
               <span className="text-sm">{servico}</span>
@@ -558,15 +731,27 @@ function AgendaSection() {
           Disponibilidade semanal - Consulta Online
         </h3>
 
+        <h3 className="text-gray-800 mb-4">
+          Disponibilidade semanal - Consulta Online
+        </h3>
+
         <div className="space-y-4">
           <div>
             <label className="block text-sm text-gray-700 mb-2">
               Dias disponíveis
             </label>
+            <label className="block text-sm text-gray-700 mb-2">
+              Dias disponíveis
+            </label>
             <div className="flex gap-2">
               {["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"].map((dia) => (
+              {["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"].map((dia) => (
                 <label key={dia} className="flex-1">
-                  <input type="checkbox" className="peer sr-only" />
+                  <input
+                    type="checkbox"
+                    defaultChecked={data.online.days.includes(dia)}
+                    className="peer sr-only"
+                  />
                   <div className="p-3 text-center border border-gray-300 rounded-lg cursor-pointer peer-checked:bg-[#6eb5d8] peer-checked:text-white peer-checked:border-[#6eb5d8] hover:bg-gray-50 transition-all">
                     {dia}
                   </div>
@@ -580,9 +765,12 @@ function AgendaSection() {
               <label className="block text-sm text-gray-700 mb-2">
                 Horário de início
               </label>
+              <label className="block text-sm text-gray-700 mb-2">
+                Horário de início
+              </label>
               <input
                 type="time"
-                defaultValue="08:00"
+                defaultValue={data.online.startTime}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
               />
             </div>
@@ -590,9 +778,12 @@ function AgendaSection() {
               <label className="block text-sm text-gray-700 mb-2">
                 Horário de término
               </label>
+              <label className="block text-sm text-gray-700 mb-2">
+                Horário de término
+              </label>
               <input
                 type="time"
-                defaultValue="18:00"
+                defaultValue={data.online.endTime}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
               />
             </div>
@@ -603,7 +794,10 @@ function AgendaSection() {
               <label className="block text-sm text-gray-700 mb-2">
                 Intervalo entre consultas
               </label>
-              <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]">
+              <select
+                defaultValue={data.online.interval}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
+              >
                 <option>15 minutos</option>
                 <option>30 minutos</option>
                 <option>45 minutos</option>
@@ -614,9 +808,12 @@ function AgendaSection() {
               <label className="block text-sm text-gray-700 mb-2">
                 Virada de agenda (dias à frente)
               </label>
+              <label className="block text-sm text-gray-700 mb-2">
+                Virada de agenda (dias à frente)
+              </label>
               <input
                 type="number"
-                defaultValue="30"
+                defaultValue={data.online.futureSchedulingDays}
                 min="1"
                 max="90"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
@@ -631,15 +828,27 @@ function AgendaSection() {
           Disponibilidade semanal - Consulta Presencial
         </h3>
 
+        <h3 className="text-gray-800 mb-4">
+          Disponibilidade semanal - Consulta Presencial
+        </h3>
+
         <div className="space-y-4">
           <div>
             <label className="block text-sm text-gray-700 mb-2">
               Dias disponíveis
             </label>
+            <label className="block text-sm text-gray-700 mb-2">
+              Dias disponíveis
+            </label>
             <div className="flex gap-2">
               {["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"].map((dia) => (
+              {["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"].map((dia) => (
                 <label key={dia} className="flex-1">
-                  <input type="checkbox" className="peer sr-only" />
+                  <input
+                    type="checkbox"
+                    defaultChecked={data.inPerson.days.includes(dia)}
+                    className="peer sr-only"
+                  />
                   <div className="p-3 text-center border border-gray-300 rounded-lg cursor-pointer peer-checked:bg-[#6eb5d8] peer-checked:text-white peer-checked:border-[#6eb5d8] hover:bg-gray-50 transition-all">
                     {dia}
                   </div>
@@ -653,9 +862,12 @@ function AgendaSection() {
               <label className="block text-sm text-gray-700 mb-2">
                 Horário de início
               </label>
+              <label className="block text-sm text-gray-700 mb-2">
+                Horário de início
+              </label>
               <input
                 type="time"
-                defaultValue="08:00"
+                defaultValue={data.inPerson.startTime}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
               />
             </div>
@@ -663,9 +875,12 @@ function AgendaSection() {
               <label className="block text-sm text-gray-700 mb-2">
                 Horário de término
               </label>
+              <label className="block text-sm text-gray-700 mb-2">
+                Horário de término
+              </label>
               <input
                 type="time"
-                defaultValue="18:00"
+                defaultValue={data.inPerson.endTime}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
               />
             </div>
@@ -676,7 +891,10 @@ function AgendaSection() {
               <label className="block text-sm text-gray-700 mb-2">
                 Intervalo entre consultas
               </label>
-              <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]">
+              <select
+                defaultValue={data.inPerson.interval}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
+              >
                 <option>15 minutos</option>
                 <option>30 minutos</option>
                 <option>45 minutos</option>
@@ -687,9 +905,12 @@ function AgendaSection() {
               <label className="block text-sm text-gray-700 mb-2">
                 Virada de agenda (dias à frente)
               </label>
+              <label className="block text-sm text-gray-700 mb-2">
+                Virada de agenda (dias à frente)
+              </label>
               <input
                 type="number"
-                defaultValue="30"
+                defaultValue={data.inPerson.futureSchedulingDays}
                 min="1"
                 max="90"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
@@ -709,7 +930,11 @@ function AgendaSection() {
   );
 }
 
-function FormasPagamentoSection() {
+function FormasPagamentoSection({
+  data,
+}: {
+  data: Settings["paymentMethods"];
+}) {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -717,8 +942,12 @@ function FormasPagamentoSection() {
           <label className="block text-sm text-gray-700 mb-2">
             Valor da consulta online
           </label>
+          <label className="block text-sm text-gray-700 mb-2">
+            Valor da consulta online
+          </label>
           <input
             type="text"
+            defaultValue={data.onlineConsultationPrice}
             placeholder="R$ 300,00"
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
           />
@@ -727,8 +956,12 @@ function FormasPagamentoSection() {
           <label className="block text-sm text-gray-700 mb-2">
             Valor da consulta presencial
           </label>
+          <label className="block text-sm text-gray-700 mb-2">
+            Valor da consulta presencial
+          </label>
           <input
             type="text"
+            defaultValue={data.inPersonConsultationPrice}
             placeholder="R$ 400,00"
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
           />
@@ -736,6 +969,9 @@ function FormasPagamentoSection() {
       </div>
 
       <div>
+        <label className="block text-sm text-gray-700 mb-3">
+          Forma de pagamento aceita
+        </label>
         <label className="block text-sm text-gray-700 mb-3">
           Forma de pagamento aceita
         </label>
@@ -750,7 +986,11 @@ function FormasPagamentoSection() {
               key={forma}
               className="flex items-center gap-2 p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer"
             >
-              <input type="checkbox" className="text-[#6eb5d8]" />
+              <input
+                type="checkbox"
+                defaultChecked={data.acceptedMethods.includes(forma)}
+                className="text-[#6eb5d8]"
+              />
               <span className="text-sm">{forma}</span>
             </label>
           ))}
@@ -760,7 +1000,7 @@ function FormasPagamentoSection() {
   );
 }
 
-function FollowupLeadSection() {
+function FollowupLeadSection({ data }: { data: Settings["leadFollowUpInfo"] }) {
   return (
     <div className="space-y-6">
       <div className="border border-gray-200 rounded-lg p-5 bg-blue-50">
@@ -769,12 +1009,20 @@ function FollowupLeadSection() {
           Enviar assim que confirmar a consulta
         </p>
 
+        <p className="text-xs text-gray-500 mb-3">
+          Enviar assim que confirmar a consulta
+        </p>
+
         <div>
+          <label className="block text-sm text-gray-700 mb-2">
+            Mensagem personalizada
+          </label>
           <label className="block text-sm text-gray-700 mb-2">
             Mensagem personalizada
           </label>
           <textarea
             rows={4}
+            defaultValue={data.basicGuidance.message}
             placeholder="Ex: Sua consulta está confirmada! Lembre-se de chegar com 10 minutos de antecedência."
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
           />
@@ -784,7 +1032,13 @@ function FollowupLeadSection() {
           <label className="block text-sm text-gray-700 mb-2">
             Anexar arquivo PDF
           </label>
+          <label className="block text-sm text-gray-700 mb-2">
+            Anexar arquivo PDF
+          </label>
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-[#6eb5d8] transition-colors cursor-pointer">
+            <p className="text-sm text-gray-500">
+              Clique ou arraste um arquivo PDF
+            </p>
             <p className="text-sm text-gray-500">
               Clique ou arraste um arquivo PDF
             </p>
@@ -799,12 +1053,20 @@ function FollowupLeadSection() {
           Enviar assim que confirmar a presença
         </p>
 
+        <p className="text-xs text-gray-500 mb-3">
+          Enviar assim que confirmar a presença
+        </p>
+
         <div>
+          <label className="block text-sm text-gray-700 mb-2">
+            Mensagem personalizada
+          </label>
           <label className="block text-sm text-gray-700 mb-2">
             Mensagem personalizada
           </label>
           <textarea
             rows={4}
+            defaultValue={data.preConsultationGuidance.message}
             placeholder="Ex: Olá! Para a sua consulta de amanhã, por favor traga seus exames anteriores e documentos."
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
           />
@@ -814,7 +1076,13 @@ function FollowupLeadSection() {
           <label className="block text-sm text-gray-700 mb-2">
             Anexar arquivo PDF
           </label>
+          <label className="block text-sm text-gray-700 mb-2">
+            Anexar arquivo PDF
+          </label>
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-[#6eb5d8] transition-colors cursor-pointer">
+            <p className="text-sm text-gray-500">
+              Clique ou arraste um arquivo PDF
+            </p>
             <p className="text-sm text-gray-500">
               Clique ou arraste um arquivo PDF
             </p>
@@ -826,7 +1094,11 @@ function FollowupLeadSection() {
   );
 }
 
-function FollowupPacienteSection() {
+function FollowupPacienteSection({
+  data,
+}: {
+  data: Settings["patientFollowUpInfo"];
+}) {
   return (
     <div className="space-y-6">
       <div className="border border-gray-200 rounded-lg p-5 bg-purple-50">
@@ -838,9 +1110,19 @@ function FollowupPacienteSection() {
             <p className="text-xs text-gray-500 mt-1">
               Enviar lembrete automático periodicamente
             </p>
+            <h3 className="text-[#1e3a5f]">
+              Relembrar paciente para próxima consulta
+            </h3>
+            <p className="text-xs text-gray-500 mt-1">
+              Enviar lembrete automático periodicamente
+            </p>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" className="sr-only peer" />
+            <input
+              type="checkbox"
+              defaultChecked={data.enabled}
+              className="sr-only peer"
+            />
             <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#6eb5d8]"></div>
           </label>
         </div>
@@ -850,9 +1132,12 @@ function FollowupPacienteSection() {
             <label className="block text-sm text-gray-700 mb-2">
               Enviar a cada quantos dias
             </label>
+            <label className="block text-sm text-gray-700 mb-2">
+              Enviar a cada quantos dias
+            </label>
             <input
               type="number"
-              defaultValue="30"
+              defaultValue={data.frequencyDays}
               min="1"
               max="365"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
@@ -864,11 +1149,17 @@ function FollowupPacienteSection() {
             <label className="block text-sm text-gray-700 mb-2">
               Mensagem personalizada
             </label>
+            <label className="block text-sm text-gray-700 mb-2">
+              Mensagem personalizada
+            </label>
             <textarea
               rows={4}
-              defaultValue="Olá [NOME]! Faz tempo que não nos vemos. Que tal agendar uma consulta de acompanhamento?"
+              defaultValue={data.message}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
             />
+            <p className="text-xs text-gray-500 mt-1">
+              Use [NOME] para inserir o nome do paciente
+            </p>
             <p className="text-xs text-gray-500 mt-1">
               Use [NOME] para inserir o nome do paciente
             </p>
@@ -879,7 +1170,7 @@ function FollowupPacienteSection() {
   );
 }
 
-function LembretesSection() {
+function LembretesSection({ data }: { data: Settings["reminderInfo"] }) {
   return (
     <div className="space-y-6">
       <div className="border border-gray-200 rounded-lg p-5 bg-blue-50">
@@ -889,9 +1180,16 @@ function LembretesSection() {
             <p className="text-xs text-gray-500 mt-1">
               Enviar lembrete aos pacientes
             </p>
+            <p className="text-xs text-gray-500 mt-1">
+              Enviar lembrete aos pacientes
+            </p>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" defaultChecked className="sr-only peer" />
+            <input
+              type="checkbox"
+              defaultChecked={data.autoReminder24h.enabled}
+              className="sr-only peer"
+            />
             <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#6eb5d8]"></div>
           </label>
         </div>
@@ -899,9 +1197,12 @@ function LembretesSection() {
           <label className="block text-sm text-gray-700 mb-2">
             Texto customizável
           </label>
+          <label className="block text-sm text-gray-700 mb-2">
+            Texto customizável
+          </label>
           <textarea
             rows={3}
-            defaultValue="Olá! Esta é uma lembrança da sua consulta marcada para amanhã às [HORÁRIO] com [MÉDICO]. Confirma sua presença?"
+            defaultValue={data.autoReminder24h.message}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
           />
         </div>
@@ -914,9 +1215,16 @@ function LembretesSection() {
             <p className="text-xs text-gray-500 mt-1">
               Pedir confirmação no dia da consulta
             </p>
+            <p className="text-xs text-gray-500 mt-1">
+              Pedir confirmação no dia da consulta
+            </p>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" defaultChecked className="sr-only peer" />
+            <input
+              type="checkbox"
+              defaultChecked={data.autoConfirmationDay.enabled}
+              className="sr-only peer"
+            />
             <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#6eb5d8]"></div>
           </label>
         </div>
@@ -932,7 +1240,13 @@ function TesteIASection() {
       text: "Olá! Sou a assistente virtual da Dra. Carolina. Como posso te ajudar?",
       sender: "ia",
     },
+    {
+      id: 1,
+      text: "Olá! Sou a assistente virtual da Dra. Carolina. Como posso te ajudar?",
+      sender: "ia",
+    },
   ]);
+  const [inputMessage, setInputMessage] = useState("");
   const [inputMessage, setInputMessage] = useState("");
 
   const sendMessage = () => {
@@ -943,8 +1257,22 @@ function TesteIASection() {
       ]);
       setInputMessage("");
 
+      setMessages([
+        ...messages,
+        { id: messages.length + 1, text: inputMessage, sender: "user" },
+      ]);
+      setInputMessage("");
+
       // Simular resposta da IA
       setTimeout(() => {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: prev.length + 1,
+            text: "Entendi! Vou te ajudar com isso. Você gostaria de agendar uma consulta?",
+            sender: "ia",
+          },
+        ]);
         setMessages((prev) => [
           ...prev,
           {
@@ -964,6 +1292,9 @@ function TesteIASection() {
           <strong>💡 Dica:</strong> Teste diferentes cenários de conversa antes
           de ativar a IA no seu consultório. Simule perguntas clínicas,
           agendamentos e cancelamentos.
+          <strong>💡 Dica:</strong> Teste diferentes cenários de conversa antes
+          de ativar a IA no seu consultório. Simule perguntas clínicas,
+          agendamentos e cancelamentos.
         </p>
       </div>
 
@@ -977,9 +1308,13 @@ function TesteIASection() {
             <div
               key={msg.id}
               className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
+              className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
             >
               <div
                 className={`max-w-xs px-4 py-2 rounded-lg ${
+                  msg.sender === "user"
+                    ? "bg-[#6eb5d8] text-white"
+                    : "bg-white text-gray-800 border border-gray-200"
                   msg.sender === "user"
                     ? "bg-[#6eb5d8] text-white"
                     : "bg-white text-gray-800 border border-gray-200"
@@ -996,6 +1331,7 @@ function TesteIASection() {
             type="text"
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
+            onKeyPress={(e) => e.key === "Enter" && sendMessage()}
             onKeyPress={(e) => e.key === "Enter" && sendMessage()}
             placeholder="Digite uma mensagem de teste..."
             className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
@@ -1016,3 +1352,4 @@ function TesteIASection() {
     </div>
   );
 }
+
