@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, MoreVertical, CheckCircle } from 'lucide-react';
+import { Search } from 'lucide-react';
 
 interface Lead {
   id: number;
@@ -17,7 +17,6 @@ interface LeadsPageProps {
 
 export default function LeadsPage({ leads, onConfirmarConsulta }: LeadsPageProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
 
   const filteredLeads = leads.filter(lead => {
     const search = searchTerm.toLowerCase();
@@ -27,11 +26,6 @@ export default function LeadsPage({ leads, onConfirmarConsulta }: LeadsPageProps
       lead.telefone.includes(searchTerm)
     );
   });
-
-  const handleConfirmarConsulta = (leadId: number) => {
-    onConfirmarConsulta(leadId);
-    setOpenMenuId(null);
-  };
 
   return (
     <div className="bg-white rounded-3xl shadow-2xl overflow-hidden h-full flex flex-col">
@@ -69,7 +63,7 @@ export default function LeadsPage({ leads, onConfirmarConsulta }: LeadsPageProps
                 <th className="px-6 py-4 text-left">CPF</th>
                 <th className="px-6 py-4 text-left">Telefone</th>
                 <th className="px-6 py-4 text-left">Data de Cadastro</th>
-                <th className="px-6 py-4 text-center">Ações</th>
+                <th className="px-6 py-4 text-center">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -92,43 +86,15 @@ export default function LeadsPage({ leads, onConfirmarConsulta }: LeadsPageProps
                     <td className="px-6 py-4 text-gray-600">{lead.telefone}</td>
                     <td className="px-6 py-4 text-gray-600">{lead.dataCadastro}</td>
                     <td className="px-6 py-4 text-center">
-                      <div className="relative inline-block">
-                        <button
-                          onClick={() => setOpenMenuId(openMenuId === lead.id ? null : lead.id)}
-                          className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
-                        >
-                          <MoreVertical className="w-5 h-5 text-gray-600" />
-                        </button>
-                        
-                        {openMenuId === lead.id && (
-                          <>
-                            <div 
-                              className="fixed inset-0 z-10" 
-                              onClick={() => setOpenMenuId(null)}
-                            ></div>
-                            <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 z-20">
-                              <div className="p-3 border-b border-gray-200">
-                                <div className="flex items-center gap-2 text-sm text-gray-600">
-                                  <input
-                                    type="checkbox"
-                                    checked={lead.consultaAgendada}
-                                    readOnly
-                                    className="w-4 h-4 text-[#6eb5d8] border-gray-300 rounded pointer-events-none"
-                                  />
-                                  <span>Consulta Agendada</span>
-                                </div>
-                              </div>
-                              <button
-                                onClick={() => handleConfirmarConsulta(lead.id)}
-                                className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors flex items-center gap-3 text-green-600"
-                              >
-                                <CheckCircle className="w-5 h-5" />
-                                <span>Confirmar Consulta</span>
-                              </button>
-                            </div>
-                          </>
-                        )}
-                      </div>
+                      {lead.consultaAgendada ? (
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                          ✓ Consulta Agendada
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600">
+                          Sem consulta
+                        </span>
+                      )}
                     </td>
                   </tr>
                 ))
