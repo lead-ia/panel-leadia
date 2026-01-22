@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search } from 'lucide-react';
+import { Search, MoreVertical, UserMinus, CheckCircle, XCircle, FileText, X } from 'lucide-react';
 
 interface Paciente {
   id: number;
@@ -7,14 +7,20 @@ interface Paciente {
   cpf: string;
   telefone: string;
   dataCadastro: string;
+  pago: boolean;
+  comprovante?: string;
 }
 
 interface PacientesPageProps {
   pacientes: Paciente[];
+  onVoltarParaLead?: (pacienteId: number) => void;
+  onMarcarPagamento?: (pacienteId: number, statusPago: boolean) => void;
 }
 
-export default function PacientesPage({ pacientes }: PacientesPageProps) {
+export default function PatientsPage({ pacientes, onVoltarParaLead, onMarcarPagamento }: PacientesPageProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [comprovanteModal, setComprovanteModal] = useState<string | null>(null);
 
   const filteredPacientes = pacientes.filter(paciente => {
     const search = searchTerm.toLowerCase();
@@ -24,6 +30,20 @@ export default function PacientesPage({ pacientes }: PacientesPageProps) {
       paciente.telefone.includes(searchTerm)
     );
   });
+
+  const handleVoltarParaLead = (pacienteId: number) => {
+    if (onVoltarParaLead) {
+      onVoltarParaLead(pacienteId);
+      setOpenMenuId(null);
+    }
+  };
+
+  const handleMarcarPagamento = (pacienteId: number, statusPago: boolean) => {
+    if (onMarcarPagamento) {
+      onMarcarPagamento(pacienteId, statusPago);
+      setOpenMenuId(null);
+    }
+  };
 
   return (
     <div className="bg-white rounded-3xl shadow-2xl overflow-hidden h-full flex flex-col">
@@ -61,12 +81,15 @@ export default function PacientesPage({ pacientes }: PacientesPageProps) {
                 <th className="px-6 py-4 text-left">CPF</th>
                 <th className="px-6 py-4 text-left">Telefone</th>
                 <th className="px-6 py-4 text-left">Data de Cadastro</th>
+                <th className="px-6 py-4 text-center">Status Pagamento</th>
+                <th className="px-6 py-4 text-center">Comprovante</th>
+                <th className="px-6 py-4 text-center">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {filteredPacientes.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
                     Nenhum paciente encontrado com os filtros aplicados
                   </td>
                 </tr>
@@ -82,6 +105,77 @@ export default function PacientesPage({ pacientes }: PacientesPageProps) {
                     <td className="px-6 py-4 text-gray-600">{paciente.cpf}</td>
                     <td className="px-6 py-4 text-gray-600">{paciente.telefone}</td>
                     <td className="px-6 py-4 text-gray-600">{paciente.dataCadastro}</td>
+                    <td className="px-6 py-4 text-center">
+                      {paciente.pago ? (
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                          ✓ Pago
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+                          ✗ Não Pago
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      {paciente.comprovante ? (
+                        <button
+                          onClick={() => setComprovanteModal(paciente.comprovante!)}
+                          className="inline-flex items-center justify-center p-2 hover:bg-blue-50 rounded-lg transition-colors group"
+                          title="Ver comprovante"
+                        >
+                          <FileText className="w-5 h-5 text-blue-600 group-hover:text-blue-700" />
+                        </button>
+                      ) : (
+                        <span className="text-gray-400 text-xs">-</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <div className="relative inline-block">
+                        <button
+                          onClick={() => setOpenMenuId(openMenuId === paciente.id ? null : paciente.id)}
+                          className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+                        >
+                          <MoreVertical className="w-5 h-5 text-gray-600" />
+                        </button>
+                        
+                        {openMenuId === paciente.id && (
+                          <>
+                            <div 
+                              className="fixed inset-0 z-10" 
+                              onClick={() => setOpenMenuId(null)}
+                            ></div>
+                            <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 z-20">
+                              <button
+                                onClick={() => handleMarcarPagamento(paciente.id, !paciente.pago)}
+                                className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors flex items-center gap-3 border-b border-gray-200 ${
+                                  paciente.pago ? 'text-red-600' : 'text-green-600'
+                                }`}
+                              >
+                                {paciente.pago ? (
+                                  <XCircle className="w-5 h-5" />
+                                ) : (
+                                  <CheckCircle className="w-5 h-5" />
+                                )}
+                                <div>
+                                  <div className="font-medium">{paciente.pago ? 'Marcar como Não Pago' : 'Marcar como Pago'}</div>
+                                  <div className="text-xs text-gray-500">Atualizar status de pagamento</div>
+                                </div>
+                              </button>
+                              <button
+                                onClick={() => handleVoltarParaLead(paciente.id)}
+                                className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors flex items-center gap-3 text-orange-600"
+                              >
+                                <UserMinus className="w-5 h-5" />
+                                <div>
+                                  <div className="font-medium">Voltar para Lead</div>
+                                  <div className="text-xs text-gray-500">Remover status de paciente</div>
+                                </div>
+                              </button>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </td>
                   </tr>
                 ))
               )}
@@ -90,13 +184,53 @@ export default function PacientesPage({ pacientes }: PacientesPageProps) {
         </div>
 
         {/* Stats */}
-        <div className="mt-6">
+        <div className="mt-6 flex items-center justify-between">
           <p className="text-sm text-gray-600">
             Exibindo <span className="text-[#1e3a5f]">{filteredPacientes.length}</span> de{' '}
             <span className="text-[#1e3a5f]">{pacientes.length}</span> pacientes
           </p>
+          <div className="flex gap-4 text-sm">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-green-500"></div>
+              <span className="text-gray-600">
+                Pagos: <strong className="text-[#1e3a5f]">
+                  {filteredPacientes.filter(p => p.pago).length}
+                </strong>
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-red-500"></div>
+              <span className="text-gray-600">
+                Não pagos: <strong className="text-[#1e3a5f]">
+                  {filteredPacientes.filter(p => !p.pago).length}
+                </strong>
+              </span>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Comprovante Modal */}
+      {comprovanteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-[#1e3a5f]">Comprovante de Pagamento</h2>
+              <button
+                onClick={() => setComprovanteModal(null)}
+                className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-600" />
+              </button>
+            </div>
+            <img
+              src={comprovanteModal}
+              alt="Comprovante de Pagamento"
+              className="w-full h-auto"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
