@@ -1,5 +1,4 @@
-import { dynamoDb, TABLE_NAME } from "@/lib/dynamodb";
-import { GetCommand, UpdateCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb";
+import { db, TABLE_NAME } from "@/lib/dynamodb";
 import { NextResponse } from "next/server";
 
 export async function GET(
@@ -8,12 +7,7 @@ export async function GET(
 ) {
   const { id } = await params;
   try {
-    const command = new GetCommand({
-      TableName: TABLE_NAME,
-      Key: { id },
-    });
-
-    const result = await dynamoDb.send(command);
+    const result = await db.get(TABLE_NAME, { userId: id });
 
     if (!result.Item) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -40,7 +34,7 @@ export async function PUT(
     const expressionAttributeValues: Record<string, any> = {};
 
     Object.keys(body).forEach((key, index) => {
-      if (key !== "id") { // Don't allow updating the ID
+      if (key !== "userId" && key !== "id") { // Don't allow updating the ID
         const attrName = `#attr${index}`;
         const attrValue = `:val${index}`;
         updateExpressionParts.push(`${attrName} = ${attrValue}`);
@@ -53,16 +47,13 @@ export async function PUT(
        return NextResponse.json({ error: "No fields to update" }, { status: 400 });
     }
 
-    const command = new UpdateCommand({
-      TableName: TABLE_NAME,
-      Key: { id },
+    const result = await db.update(TABLE_NAME, { userId: id }, {
       UpdateExpression: `SET ${updateExpressionParts.join(", ")}`,
       ExpressionAttributeNames: expressionAttributeNames,
       ExpressionAttributeValues: expressionAttributeValues,
       ReturnValues: "ALL_NEW",
     });
 
-    const result = await dynamoDb.send(command);
     return NextResponse.json(result.Attributes);
   } catch (error) {
     console.error("Error updating user:", error);
@@ -76,12 +67,7 @@ export async function DELETE(
 ) {
   const { id } = await params;
   try {
-    const command = new DeleteCommand({
-      TableName: TABLE_NAME,
-      Key: { id },
-    });
-
-    await dynamoDb.send(command);
+    await db.delete(TABLE_NAME, { userId: id });
     return NextResponse.json({ message: "User deleted successfully" });
   } catch (error) {
     console.error("Error deleting user:", error);
