@@ -16,6 +16,8 @@ import {
   Users,
   Calendar1Icon,
 } from "lucide-react";
+import { handleClientScriptLoad } from "next/script";
+import { useUser } from "@/components/auth/user-context";
 
 type Section =
   | "dados-basicos"
@@ -71,43 +73,14 @@ export function SettingsPage() {
     { id: "teste-ia", title: "10. Teste da IA", icon: TestTube2 },
   ];
 
-  async function handleConnectCalendar() {
-    try {
-      const response = await fetch("/api/calendar/oauth/start");
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Erro ao iniciar conexão");
-      }
-
-      if (data.auth_url) {
-        window.location.href = data.auth_url;
-      } else {
-        throw new Error("URL de autorização não recebida");
-      }
-    } catch (error) {
-      console.error("Erro ao conectar calendário:", error);
-      alert("Erro ao conectar calendário. Tente novamente.");
-    }
-  }
-
   return (
     <div className="bg-white rounded-3xl shadow-2xl overflow-hidden h-full flex flex-col">
       <div className="border-b border-gray-200 p-6 bg-white flex items-center">
-        <div className="flex-1 flex flex-col gap-y-2">
+        <div className="flex flex-col gap-y-2">
           <h1 className="text-[#1e3a5f] text-2xl">Configurações</h1>
           <p className="text-gray-600 mt-1">
             Gerencie as preferências e funcionalidades do sistema
           </p>
-        </div>
-        <div>
-          <button
-            onClick={handleConnectCalendar}
-            className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#1e3a5f] to-[#6eb5d8] text-white hover:shadow-lg transition-all flex items-center gap-2"
-          >
-            <Calendar1Icon className="w-5 h-5" />
-            Conectar Calendário
-          </button>
         </div>
       </div>
 
@@ -347,6 +320,32 @@ function DadosConsultorioSection() {
 }
 
 function CanaisSection() {
+  const { updateUser } = useUser();
+
+  async function handleConnectCalendar() {
+    try {
+      const response = await fetch("/api/calendar/oauth/start");
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Erro ao iniciar conexão");
+      }
+
+      if (data.success && data.oauth_data) {
+        const { email, ...calendarInfo } = data.oauth_data;
+        await updateUser({ calendarInfo });
+        alert("Calendário conectado com sucesso!");
+      } else if (data.auth_url) {
+        window.location.href = data.auth_url;
+      } else {
+        throw new Error("URL de autorização não recebida");
+      }
+    } catch (error) {
+      console.error("Erro ao conectar calendário:", error);
+      alert("Erro ao conectar calendário. Tente novamente.");
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
@@ -392,7 +391,10 @@ function CanaisSection() {
               </p>
             </div>
           </div>
-          <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all">
+          <button
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all"
+            onClick={handleConnectCalendar}
+          >
             Conectar
           </button>
         </div>
@@ -977,10 +979,11 @@ function TesteIASection() {
               className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`max-w-xs px-4 py-2 rounded-lg ${msg.sender === "user"
+                className={`max-w-xs px-4 py-2 rounded-lg ${
+                  msg.sender === "user"
                     ? "bg-[#6eb5d8] text-white"
                     : "bg-white text-gray-800 border border-gray-200"
-                  }`}
+                }`}
               >
                 <p className="text-sm">{msg.text}</p>
               </div>
