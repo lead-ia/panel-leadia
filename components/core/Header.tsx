@@ -9,6 +9,8 @@ import {
 } from "lucide-react";
 import { getAuth, signOut } from "firebase/auth";
 import { app } from "@/firebase";
+import { useAuth } from "@/components/auth/auth-context";
+import { useUser } from "@/components/auth/user-context";
 
 interface HeaderProps {
   currentPath: string | null;
@@ -16,6 +18,11 @@ interface HeaderProps {
 }
 
 export function Header({ currentPath, logo }: HeaderProps) {
+  const { user: firebaseUser } = useAuth();
+  const { dbUser } = useUser();
+
+  const user = dbUser || firebaseUser;
+
   const menuItems = [
     { href: "/dashboard-main/home", label: "Home", icon: Home },
     {
@@ -69,14 +76,32 @@ export function Header({ currentPath, logo }: HeaderProps) {
 
           {/* User Profile and Logout */}
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-3">
-              <img
-                src="https://images.unsplash.com/photo-1712168567859-e24cbc155219?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjB3b21hbiUyMGF2YXRhcnxlbnwxfHx8fDE3NjU0MzE1NTR8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
-                alt="Julia Sousa"
-                className="w-10 h-10 rounded-full object-cover border-2 border-white/50"
-              />
-              <span className="text-white">Julia Sousa</span>
-            </div>
+            {user && (
+              <div className="flex items-center gap-3">
+                {user.photoURL ? (
+                  <img
+                    src={user.photoURL}
+                    alt={
+                      (user as any).name || (user as any).displayName || "User"
+                    }
+                    className="w-10 h-10 rounded-full object-cover border-2 border-white/50"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white border-2 border-white/50">
+                    {(
+                      (user as any).name ||
+                      (user as any).displayName ||
+                      user.email
+                    )?.charAt(0) || "U"}
+                  </div>
+                )}
+                <span className="text-white">
+                  {(user as any).name ||
+                    (user as any).displayName ||
+                    user.email}
+                </span>
+              </div>
+            )}
 
             <button
               onClick={handleSignOut}
