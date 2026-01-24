@@ -10,6 +10,7 @@ import React, {
 import { useAuth } from "./auth-context";
 import { UserData } from "@/lib/repositories/user-repository";
 import { FirebaseUserRepository } from "@/lib/repositories/firebase-user-repository";
+import { Settings } from "@/types/settings";
 
 interface UserContextType {
   dbUser: UserData | null;
@@ -17,6 +18,7 @@ interface UserContextType {
   error: string | null;
   refreshUser: () => Promise<void>;
   updateUser: (data: Partial<UserData>) => Promise<void>;
+  updateSettings: (settings: Partial<Settings>) => Promise<void>;
   createUser: (user: UserData) => Promise<void>;
 }
 
@@ -93,9 +95,36 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const updateSettings = async (newSettings: Partial<Settings>) => {
+    if (!firebaseUser || !dbUser) return;
+
+    try {
+      await userRepository.updateSettings(firebaseUser.uid, newSettings);
+      // Optimistically update local state
+      setDbUser({
+        ...dbUser,
+        settings: {
+          ...(dbUser.settings || {}),
+          ...newSettings,
+        } as Settings,
+      });
+    } catch (err) {
+      console.error("Error updating settings:", err);
+      throw err;
+    }
+  };
+
   return (
     <UserContext.Provider
-      value={{ dbUser, loading, error, refreshUser, updateUser, createUser }}
+      value={{
+        dbUser,
+        loading,
+        error,
+        refreshUser,
+        updateUser,
+        createUser,
+        updateSettings,
+      }}
     >
       {children}
     </UserContext.Provider>

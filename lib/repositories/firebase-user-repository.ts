@@ -1,6 +1,7 @@
 import { db } from "@/firebase";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { IUserRepository, UserData } from "./user-repository";
+import { Settings } from "@/types/settings";
 
 export class FirebaseUserRepository implements IUserRepository {
   private collectionName = "users";
@@ -51,6 +52,23 @@ export class FirebaseUserRepository implements IUserRepository {
       throw new Error("User not found after update");
     } catch (error) {
       console.error("FirebaseUserRepository.updateUser error:", error);
+      throw error;
+    }
+  }
+
+  async updateSettings(userId: string, settings: Partial<Settings>): Promise<void> {
+    try {
+      const docRef = doc(db, this.collectionName, userId);
+      
+      // Convert partial settings to dot notation for deep merge in Firestore
+      const updateData: any = {};
+      Object.entries(settings).forEach(([key, value]) => {
+        updateData[`settings.${key}`] = value;
+      });
+
+      await updateDoc(docRef, updateData);
+    } catch (error) {
+      console.error("FirebaseUserRepository.updateSettings error:", error);
       throw error;
     }
   }

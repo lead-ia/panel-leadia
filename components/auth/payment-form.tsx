@@ -1,11 +1,11 @@
-"use client";
-
-import type React from "react";
+import React from "react";
+import CurrencyMaskedInput from "@/components/core/CurrencyInput";
 
 /**
  * Defines the shape of the payment form data.
  */
 interface PaymentFormData {
+  amount: string;
   cardNumber: string;
   expiry: string;
   cvv: string;
@@ -17,6 +17,7 @@ interface PaymentFormData {
  * Each key corresponds to a field in PaymentFormData.
  */
 interface PaymentFormErrors {
+  amount?: string;
   cardNumber?: string;
   expiry?: string;
   cvv?: string;
@@ -29,17 +30,51 @@ interface PaymentFormErrors {
 interface PaymentFormProps {
   formData: PaymentFormData;
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleAmountChange?: (value: number) => void;
   formErrors?: PaymentFormErrors;
 }
 
-export function PaymentForm({ formData, handleChange, formErrors = {} }: PaymentFormProps) {
+export function PaymentForm({
+  formData,
+  handleChange,
+  handleAmountChange,
+  formErrors = {},
+}: PaymentFormProps) {
   return (
-    <div className="pt-4 border-t border-border" >
-      <h3 className="text-sm font-semibold text-foreground mb-4">Informações de pagamento</h3>
+    <div className="pt-4 border-t border-border">
+      <h3 className="text-sm font-semibold text-foreground mb-4">
+        Informações de pagamento
+      </h3>
+
+      {/* Amount */}
+      <div className="mb-4">
+        <label
+          htmlFor="amount"
+          className="block text-sm font-medium text-foreground mb-2"
+        >
+          Valor do pagamento
+        </label>
+        <div className="relative">
+          <CurrencyMaskedInput
+            name="amount"
+            value={+formData.amount || 0}
+            onChange={(value) => handleAmountChange?.(value)}
+            className="w-full px-4 py-3 border border-input bg-background text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+        </div>
+        {formErrors.amount && (
+          <p className="text-sm text-destructive mt-1">{formErrors.amount}</p>
+        )}
+      </div>
 
       {/* Card Number */}
       <div className="mb-4">
-        <label htmlFor="cardNumber" className="block text-sm font-medium text-foreground mb-2">Número do cartão</label>
+        <label
+          htmlFor="cardNumber"
+          className="block text-sm font-medium text-foreground mb-2"
+        >
+          Número do cartão
+        </label>
         <div className="relative">
           <svg
             className="absolute left-3 top-3 w-5 h-5 text-muted-foreground"
@@ -66,13 +101,22 @@ export function PaymentForm({ formData, handleChange, formErrors = {} }: Payment
             required
           />
         </div>
-        {formErrors.cardNumber && <p className="text-sm text-destructive mt-1">{formErrors.cardNumber}</p>}
+        {formErrors.cardNumber && (
+          <p className="text-sm text-destructive mt-1">
+            {formErrors.cardNumber}
+          </p>
+        )}
       </div>
 
       {/* Expiry and CVV */}
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div>
-          <label htmlFor="expiry" className="block text-sm font-medium text-foreground mb-2">Data de validade</label>
+          <label
+            htmlFor="expiry"
+            className="block text-sm font-medium text-foreground mb-2"
+          >
+            Data de validade
+          </label>
           <div className="relative">
             <svg
               className="absolute left-3 top-3 w-5 h-5 text-muted-foreground"
@@ -99,10 +143,17 @@ export function PaymentForm({ formData, handleChange, formErrors = {} }: Payment
               required
             />
           </div>
-          {formErrors.expiry && <p className="text-sm text-destructive mt-1">{formErrors.expiry}</p>}
+          {formErrors.expiry && (
+            <p className="text-sm text-destructive mt-1">{formErrors.expiry}</p>
+          )}
         </div>
         <div>
-          <label htmlFor="cvv" className="block text-sm font-medium text-foreground mb-2">CVV</label>
+          <label
+            htmlFor="cvv"
+            className="block text-sm font-medium text-foreground mb-2"
+          >
+            CVV
+          </label>
           <div className="relative">
             <svg
               className="absolute left-3 top-3 w-5 h-5 text-muted-foreground"
@@ -129,13 +180,20 @@ export function PaymentForm({ formData, handleChange, formErrors = {} }: Payment
               required
             />
           </div>
-          {formErrors.cvv && <p className="text-sm text-destructive mt-1">{formErrors.cvv}</p>}
+          {formErrors.cvv && (
+            <p className="text-sm text-destructive mt-1">{formErrors.cvv}</p>
+          )}
         </div>
       </div>
 
       {/* Cardholder Name */}
       <div>
-        <label htmlFor="cardholderName" className="block text-sm font-medium text-foreground mb-2">Nome do titular do cartão</label>
+        <label
+          htmlFor="cardholderName"
+          className="block text-sm font-medium text-foreground mb-2"
+        >
+          Nome do titular do cartão
+        </label>
         <div className="relative">
           <svg
             className="absolute left-3 top-3 w-5 h-5 text-muted-foreground"
@@ -161,7 +219,11 @@ export function PaymentForm({ formData, handleChange, formErrors = {} }: Payment
             required
           />
         </div>
-        {formErrors.cardholderName && <p className="text-sm text-destructive mt-1">{formErrors.cardholderName}</p>}
+        {formErrors.cardholderName && (
+          <p className="text-sm text-destructive mt-1">
+            {formErrors.cardholderName}
+          </p>
+        )}
       </div>
     </div>
   );
