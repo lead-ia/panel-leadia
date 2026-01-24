@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-context";
 import DashboardHeader from "@/components/home/dashboard-header";
+import { Footer } from "@/components/core/Footer";
 
 export default function DashboardLayout({
   children,
@@ -24,10 +25,15 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col h-screen overflow-hidden">
-      <DashboardHeader />
-      <div className="max-w-screen-2xl mx-auto px-3 py-4 flex-1 w-full overflow-hidden">
+    <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">
+      <div className="flex-shrink-0">
+        <DashboardHeader />
+      </div>
+      <main className="flex-1 min-h-0 overflow-hidden flex flex-col max-w-screen-2xl mx-auto w-full">
         {children}
+      </main>
+      <div className="flex-shrink-0">
+        <Footer />
       </div>
     </div>
   );
