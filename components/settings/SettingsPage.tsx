@@ -37,7 +37,7 @@ type Section =
   | "lembretes";
 
 export function SettingsPage() {
-  const { dbUser, loading, error } = useUser();
+  const { loading, error } = useUser();
   const [expandedSection, setExpandedSection] = useState<Section | null>(
     "dados-basicos",
   );
