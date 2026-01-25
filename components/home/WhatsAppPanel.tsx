@@ -1,56 +1,94 @@
 import { Search, Clock, Tag } from "lucide-react";
 import { ChatList } from "./ChatList";
-import { useState } from "react";
 import { ChatModal } from "./ChatModal";
-
-import { Conversation } from "@/lib/repositories/chat-repository";
+import { useChat } from "@/hooks/use-chat";
+import { ChatContext } from "@/components/chat/chat-context";
+import { useState } from "react";
+import { useUser } from "../auth/user-context";
+import { Button } from "../ui/button";
+import { useRouter } from "next/navigation";
+import { useWhatsappSession } from "@/hooks/use-whatsapp-session";
 
 export function WhatsAppPanel() {
-  const [selectedChat, setSelectedChat] = useState<number | null>(null);
+  const router = useRouter();
+  const { dbUser } = useUser();
+  const { sessionStatus } = useWhatsappSession(dbUser?.phoneNumber ?? "");
+  const chatState = useChat({
+    useWebsockets: true,
+    sessionName: dbUser?.phoneNumber ?? "",
+  });
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const handleChatClick = (chat: Conversation) => {
-    setSelectedChat(chat.id);
-  };
+  if (!dbUser?.phoneNumber) {
+    return (
+      <div className="flex flex-col h-full justify-center items-center p-6 gap-y-4">
+        <h1 className="text-slate-600">
+          Whatsapp não está conectado. Faça sua integração em{" "}
+        </h1>
+        <Button
+          onClick={() => {
+            router.push("/dashboard-main/settings?section=canais");
+          }}
+        >
+          Configurações
+        </Button>
+      </div>
+    );
+  }
+
+  if (sessionStatus != "WORKING") {
+    return (
+      <div className="flex flex-col h-full justify-center items-center p-6 gap-y-4">
+        <h1 className="text-slate-600">
+          Sua sessão do whatsapp está parada. Cheque sua conexão do whatsapp
+          em{" "}
+        </h1>
+        <Button
+          onClick={() => {
+            router.push("/dashboard-main/settings?section=canais");
+          }}
+        >
+          Configurações
+        </Button>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
-      <div className="flex-shrink-0">
-        <h2 className="text-[#1e3a5f] mb-4 font-normal">Conversas WhatsApp</h2>
+    <ChatContext.Provider value={chatState}>
+      <div className="flex flex-col h-full overflow-hidden px-4">
+        <div className="flex-shrink-0">
+          <h2 className="text-[#1e3a5f] mb-4 font-normal">
+            Conversas WhatsApp
+          </h2>
 
-        <div className="relative mb-4">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Buscar paciente..."
-            className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6eb5d8] focus:border-transparent"
+          <div className="relative mb-4">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Buscar paciente..."
+              className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6eb5d8] focus:border-transparent"
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto">
+          <ChatList searchQuery={searchQuery} />
+        </div>
+
+        {chatState.selectedChat && (
+          <ChatModal
+            chat={
+              chatState.conversations.find(
+                (c) => c.id === chatState.selectedChat,
+              )!
+            }
+            messages={chatState.messages}
+            onClose={() => chatState.handleChatClick(null)}
           />
-        </div>
-
-        <div className="flex gap-2 mb-4">
-          <button className="px-4 py-2 bg-[#6eb5d8] text-white rounded-lg hover:bg-[#5aa5c8] transition-colors flex items-center gap-2">
-            <Tag className="w-4 h-4" />
-            Todas
-          </button>
-          <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2">
-            <Clock className="w-4 h-4" />
-            Pendentes
-          </button>
-        </div>
+        )}
       </div>
-
-      <div className="flex-1 overflow-y-auto">
-        <ChatList
-          onChatClick={handleChatClick}
-          selectedChat={selectedChat || undefined}
-        />
-      </div>
-
-      {selectedChat && (
-        <ChatModal
-          chatId={selectedChat}
-          onClose={() => setSelectedChat(null)}
-        />
-      )}
-    </div>
+    </ChatContext.Provider>
   );
 }

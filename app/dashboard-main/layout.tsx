@@ -26,7 +26,7 @@ export default function DashboardLayout({
 
   return (
     <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">
-      <div className="flex-shrink-0">
+      <div>
         <DashboardHeader />
       </div>
       <main className="flex-1 min-h-0 overflow-hidden flex flex-col max-w-screen-2xl mx-auto w-full">

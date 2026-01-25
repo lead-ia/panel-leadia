@@ -46,7 +46,7 @@ export function Header({ currentPath, logo }: HeaderProps) {
 
   return (
     <header className="bg-gradient-to-r from-[#1e3a5f] via-[#2a5080] to-[#6eb5d8] border-b border-white/20">
-      <div className="container mx-auto px-6 py-4">
+      <div className="px-6 py-4 max-w-full lg:max-w-screen-2xl lg:mx-auto">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src={logo} alt="leadIA" className="h-10" />

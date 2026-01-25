@@ -1,14 +1,16 @@
 import { MessageCircle, Loader2, AlertCircle } from "lucide-react";
-import { useChat } from "@/hooks/use-chat";
-import { Conversation } from "@/lib/repositories/chat-repository";
+import { useContext } from "react";
+import { ChatContext } from "@/components/chat/chat-context";
 
-interface ChatListProps {
-  onChatClick: (chat: Conversation) => void;
-  selectedChat?: number;
-}
+export function ChatList({ searchQuery }: { searchQuery: string }) {
+  const context = useContext(ChatContext);
 
-export function ChatList({ onChatClick, selectedChat }: ChatListProps) {
-  const { conversations, loading, error } = useChat();
+  if (!context) {
+    return <div>Error: ChatContext not found</div>;
+  }
+
+  const { conversations, loading, error, selectedChat, handleChatClick } =
+    context;
 
   if (loading) {
     return (
@@ -37,12 +39,18 @@ export function ChatList({ onChatClick, selectedChat }: ChatListProps) {
     );
   }
 
+  const conversationList = searchQuery
+    ? conversations.filter((chat) =>
+        chat.name.toLowerCase().includes(searchQuery.toLowerCase()),
+      )
+    : conversations;
+
   return (
     <div className="space-y-2">
-      {conversations.map((chat) => (
+      {conversationList.map((chat) => (
         <div
           key={chat.id}
-          onClick={() => onChatClick(chat)}
+          onClick={() => handleChatClick(chat)}
           className={`p-3 rounded-xl cursor-pointer transition-all border ${
             selectedChat === chat.id
               ? "bg-[#4a90e2] text-white shadow-lg border-[#4a90e2]"
@@ -52,9 +60,17 @@ export function ChatList({ onChatClick, selectedChat }: ChatListProps) {
           <div className="flex items-start justify-between mb-1">
             <div className="flex items-center gap-2">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white">
-                {chat.name.charAt(0)}
+                {chat.avatar ? (
+                  <img
+                    src={chat.avatar}
+                    alt={chat.name}
+                    className="w-full h-full object-cover rounded-full"
+                  />
+                ) : (
+                  <span className="text-white">{chat.name.charAt(0)}</span>
+                )}
               </div>
-              <div>
+              <div className="flex-1">
                 <h3
                   className={`text-sm ${
                     selectedChat === chat.id ? "text-white" : "text-[#1e3a5f]"
@@ -63,7 +79,7 @@ export function ChatList({ onChatClick, selectedChat }: ChatListProps) {
                   {chat.name}
                 </h3>
                 <p
-                  className={`text-xs ${
+                  className={`text-xs line-clamp-2 ${
                     selectedChat === chat.id ? "text-blue-100" : "text-gray-500"
                   }`}
                 >
@@ -85,8 +101,8 @@ export function ChatList({ onChatClick, selectedChat }: ChatListProps) {
                 chat.tag === "Urgente"
                   ? "bg-red-100 text-red-600"
                   : chat.tag === "Agendamento"
-                  ? "bg-yellow-100 text-yellow-600"
-                  : "bg-green-100 text-green-600"
+                    ? "bg-yellow-100 text-yellow-600"
+                    : "bg-green-100 text-green-600"
               }`}
             >
               {chat.tag}
