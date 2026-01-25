@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   User,
   Building2,
@@ -38,9 +39,19 @@ type Section =
 
 export function SettingsPage() {
   const { loading, error } = useUser();
+  const searchParams = useSearchParams();
+  const sectionParam = searchParams.get("section") as Section | null;
+
   const [expandedSection, setExpandedSection] = useState<Section | null>(
-    "dados-basicos",
+    sectionParam || "dados-basicos",
   );
+
+  // Update expanded section if the URL parameter changes
+  useEffect(() => {
+    if (sectionParam) {
+      setExpandedSection(sectionParam);
+    }
+  }, [sectionParam]);
 
   if (loading) {
     return (

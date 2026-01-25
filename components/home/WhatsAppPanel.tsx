@@ -4,14 +4,55 @@ import { ChatModal } from "./ChatModal";
 import { useChat } from "@/hooks/use-chat";
 import { ChatContext } from "@/components/chat/chat-context";
 import { useState } from "react";
+import { useUser } from "../auth/user-context";
+import { Button } from "../ui/button";
+import { useRouter } from "next/navigation";
+import { useWhatsappSession } from "@/hooks/use-whatsapp-session";
 
 export function WhatsAppPanel() {
+  const router = useRouter();
+  const { dbUser } = useUser();
+  const { sessionStatus } = useWhatsappSession(dbUser?.phoneNumber ?? "");
   const chatState = useChat({
     useWebsockets: true,
-    // TODO: this will come from the settings model probably
-    sessionName: "zeca_test",
+    sessionName: dbUser?.phoneNumber ?? "",
   });
   const [searchQuery, setSearchQuery] = useState("");
+
+  if (!dbUser?.phoneNumber) {
+    return (
+      <div className="flex flex-col h-full justify-center items-center p-6 gap-y-4">
+        <h1 className="text-slate-600">
+          Whatsapp não está conectado. Faça sua integração em{" "}
+        </h1>
+        <Button
+          onClick={() => {
+            router.push("/dashboard-main/settings?section=canais");
+          }}
+        >
+          Configurações
+        </Button>
+      </div>
+    );
+  }
+
+  if (sessionStatus != "WORKING") {
+    return (
+      <div className="flex flex-col h-full justify-center items-center p-6 gap-y-4">
+        <h1 className="text-slate-600">
+          Sua sessão do whatsapp está parada. Cheque sua conexão do whatsapp
+          em{" "}
+        </h1>
+        <Button
+          onClick={() => {
+            router.push("/dashboard-main/settings?section=canais");
+          }}
+        >
+          Configurações
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <ChatContext.Provider value={chatState}>
