@@ -200,6 +200,110 @@ export class WahaChatRepository implements IChatRepository {
     }
   }
 
+  async getSessionByName(sessionName: string): Promise<any> {
+    try {
+      const response = await axios.get(
+        `${this.apiUrl}/api/sessions/${sessionName}`,
+        {
+          headers: {
+            'X-API-KEY': process.env.WAHA_API_KEY || process.env.NEXT_PUBLIC_WAHA_API_KEY,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching session ${sessionName}:`, error);
+      return null;
+    }
+  }
+
+async createSession(sessionName: string): Promise<void> {
+    try {
+      await axios.post(
+        `${this.apiUrl}/api/sessions`,
+        { name: sessionName, start: true },
+        {
+          headers: {
+            'X-API-KEY': process.env.WAHA_API_KEY || process.env.NEXT_PUBLIC_WAHA_API_KEY,
+          },
+        }
+      );
+    } catch (error) {
+      console.error(`Error starting session ${sessionName}:`, error);
+      throw error;
+    }
+  }
+
+  async startSession(sessionName: string): Promise<void> {
+    try {
+      await axios.post(
+        `${this.apiUrl}/api/sessions/${sessionName}/start`,
+        { name: sessionName },
+        {
+          headers: {
+            'X-API-KEY': process.env.WAHA_API_KEY || process.env.NEXT_PUBLIC_WAHA_API_KEY,
+          },
+        }
+      );
+    } catch (error) {
+      console.error(`Error starting session ${sessionName}:`, error);
+      throw error;
+    }
+  }
+
+async restartSession(sessionName: string): Promise<void> {
+    try {
+      await axios.post(
+        `${this.apiUrl}/api/sessions/${sessionName}/restart`,
+        { name: sessionName },
+        {
+          headers: {
+            'X-API-KEY': process.env.WAHA_API_KEY || process.env.NEXT_PUBLIC_WAHA_API_KEY,
+          },
+        }
+      );
+    } catch (error) {
+      console.error(`Error starting session ${sessionName}:`, error);
+      throw error;
+    }
+  }
+
+async stopSession(sessionName: string): Promise<void> {
+    try {
+      await axios.post(
+        `${this.apiUrl}/api/sessions/${sessionName}/stop`,
+        { name: sessionName },
+        {
+          headers: {
+            'X-API-KEY': process.env.WAHA_API_KEY || process.env.NEXT_PUBLIC_WAHA_API_KEY,
+          },
+        }
+      );
+    } catch (error) {
+      console.error(`Error starting session ${sessionName}:`, error);
+      throw error;
+    }
+  }
+
+  async getQrCode(sessionName: string): Promise<Blob | null> {
+    try {
+      const response = await axios.get(
+        `${this.apiUrl}/api/${sessionName}/auth/qr?format=image`,
+        {
+          responseType: 'blob',
+          headers: {
+            'X-API-KEY': process.env.WAHA_API_KEY || process.env.NEXT_PUBLIC_WAHA_API_KEY,
+            Accept: 'image/png',
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching QR code for session ${sessionName}:`, error);
+      return null;
+    }
+  }
+
   private getMockData(): Conversation[] {
     return [
       {
