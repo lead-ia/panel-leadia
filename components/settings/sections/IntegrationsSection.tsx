@@ -1,5 +1,7 @@
 import { useUser } from "@/components/auth/user-context";
 import { MessageSquare, Calendar, Building2 } from "lucide-react";
+import { WhatsappConnect } from "../whatsapp-connect";
+import { Button } from "@/components/ui/button";
 
 export function IntegrationsSection() {
   const { updateUser } = useUser();
@@ -31,22 +33,7 @@ export function IntegrationsSection() {
   return (
     <div className="space-y-6">
       <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white">
-              <MessageSquare className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-gray-800">WhatsApp Oficial</p>
-              <p className="text-xs text-gray-500">
-                Conecte seu número para atendimento
-              </p>
-            </div>
-          </div>
-          <button className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all">
-            Conectar
-          </button>
-        </div>
+        <WhatsappConnect />
       </div>
 
       <div>
@@ -73,12 +60,7 @@ export function IntegrationsSection() {
               </p>
             </div>
           </div>
-          <button
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all"
-            onClick={handleConnectCalendar}
-          >
-            Conectar
-          </button>
+          <Button onClick={handleConnectCalendar}>Conectar</Button>
         </div>
       </div>
 
