@@ -1,18 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useUser } from "@/components/auth/user-context";
 import { BasicInfo, Settings } from "@/types/settings";
 import { useDebouncedCallback } from "@/hooks/use-debounce";
 
 export function BasicInfoSection() {
-  const { dbUser, updateSettings } = useUser();
+  const { dbUser, updateSettings, updateUser } = useUser();
 
   if (!dbUser) {
     return <></>;
   }
 
   const baseSettings: BasicInfo = {
-    fullName: dbUser.name || dbUser.displayName,
-    displayName: dbUser.displayName,
+    fullName: dbUser.name || dbUser.displayName || "",
+    displayName: dbUser.displayName || "",
+    phoneNumber: dbUser.phoneNumber || "",
     specialty: "",
     subspecialty: "",
     crm: "",
@@ -29,7 +30,7 @@ export function BasicInfoSection() {
     if (dbUser?.settings?.basicInfo) {
       setLocalData(dbUser.settings.basicInfo);
     }
-  }, [dbUser?.settings?.basicInfo]);
+  }, []);
 
   const debouncedUpdate = useDebouncedCallback((updatedData: BasicInfo) => {
     updateSettings({
@@ -44,6 +45,13 @@ export function BasicInfoSection() {
     };
     setLocalData(newData);
     debouncedUpdate(newData);
+
+    // Sync with user document if displayName or phoneNumber changes
+    if (field === "displayName" || field === "phoneNumber") {
+      updateUser({
+        [field]: value,
+      });
+    }
   };
 
   return (
