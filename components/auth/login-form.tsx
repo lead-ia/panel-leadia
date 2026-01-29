@@ -60,7 +60,7 @@ export function LoginForm() {
         const maxAge = 60 * 60 * 24 * 7; // 7 days
         const secure = location.protocol === "https:" ? "; Secure" : "";
         document.cookie = `token=${encodeURIComponent(user.uid)}; Path=/; Max-Age=${maxAge}; SameSite=Lax${secure}`;
-        router.push("/dashboard-main");
+        router.push("/dashboard-main/home");
       } else {
         setError("Ocorreu um erro inesperado ao fazer login.");
       }

@@ -16,14 +16,15 @@ export function useChat(options?: { useWebsockets?: boolean; sessionName: string
   const [repository, setRepository] = useState<IChatRepository | null>(null);
 
   useEffect(() => {
+    if (!options?.sessionName) {
+      return
+    }
+
     let repo: IChatRepository;
 
-    if (options?.useWebsockets && options.sessionName) {
       const { WahaWsChatRepository } = require('@/lib/repositories/waha-ws-chat-repository');
       repo = new WahaWsChatRepository(options.sessionName);
-    } else {
-      repo = new ChatRepository();
-    }
+    
     setRepository(repo);
 
     const fetchConversations = async () => {
