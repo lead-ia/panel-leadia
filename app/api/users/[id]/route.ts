@@ -1,5 +1,10 @@
 import { db, TABLE_NAME } from "@/lib/dynamodb";
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { GetCommand } from "@aws-sdk/lib-dynamodb";
 import { NextResponse } from "next/server";
+
+const client = new DynamoDBClient({});
+const tableName = process.env.USERS_TABLE
 
 export async function GET(
   request: Request,
@@ -7,9 +12,15 @@ export async function GET(
 ) {
   const { id } = await params;
   try {
-    const result = await db.get(TABLE_NAME, { userId: id });
+    // Since the primary key is 'email', use it in the Key
+    const command = new GetCommand({
+      TableName: tableName, 
+      Key: { email: id } // 'id' param contains the email value
+    })
+    const result = await client.send(command)
 
     if (!result.Item) {
+      console.log("User not found!!!");
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
@@ -26,7 +37,10 @@ export async function PUT(
 ) {
   const { id } = await params;
   try {
+    console.log('Updating user start')
+    console.log('Updating user id: ', id)
     const body = await request.json();
+    console.log('Incoming body: ', body)
     
     // Construct UpdateExpression dynamically based on body
     const updateExpressionParts: string[] = [];
@@ -34,7 +48,7 @@ export async function PUT(
     const expressionAttributeValues: Record<string, any> = {};
 
     Object.keys(body).forEach((key, index) => {
-      if (key !== "userId" && key !== "id") { // Don't allow updating the ID
+      if (key !== "email" && key !== "id") { // Don't allow updating the primary key (email)
         const attrName = `#attr${index}`;
         const attrValue = `:val${index}`;
         updateExpressionParts.push(`${attrName} = ${attrValue}`);
@@ -47,7 +61,7 @@ export async function PUT(
        return NextResponse.json({ error: "No fields to update" }, { status: 400 });
     }
 
-    const result = await db.update(TABLE_NAME, { userId: id }, {
+    const result = await db.update(TABLE_NAME, { email: id }, {
       UpdateExpression: `SET ${updateExpressionParts.join(", ")}`,
       ExpressionAttributeNames: expressionAttributeNames,
       ExpressionAttributeValues: expressionAttributeValues,
@@ -58,19 +72,5 @@ export async function PUT(
   } catch (error) {
     console.error("Error updating user:", error);
     return NextResponse.json({ error: "Failed to update user" }, { status: 500 });
-  }
-}
-
-export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params;
-  try {
-    await db.delete(TABLE_NAME, { userId: id });
-    return NextResponse.json({ message: "User deleted successfully" });
-  } catch (error) {
-    console.error("Error deleting user:", error);
-    return NextResponse.json({ error: "Failed to delete user" }, { status: 500 });
   }
 }

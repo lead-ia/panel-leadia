@@ -1,5 +1,10 @@
 import { db, TABLE_NAME } from "@/lib/dynamodb";
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { GetCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
 import { NextResponse } from "next/server";
+
+const client = new DynamoDBClient({});
+const tableName = 'users'
 
 export async function GET() {
   try {
@@ -18,13 +23,14 @@ export async function POST(request: Request) {
   try {
     const { userId, email, ...rest } = await request.json();
 
-    if (!userId) {
-      return NextResponse.json({ error: "userId is required" }, { status: 400 });
+    if (!email) {
+      return NextResponse.json({ error: "email is required" }, { status: 400 });
     }
 
     // 1. Check if the user already exists
     try {
-      const existingUser = await db.get(TABLE_NAME, { userId });
+      const command = new GetCommand({ TableName: tableName, Key: { email } });
+      const existingUser = await client.send(command);
       if (existingUser.Item) {
         return NextResponse.json(existingUser.Item);
       }
@@ -47,51 +53,13 @@ export async function POST(request: Request) {
 
     // 3. Try to create the user record
     try {
-      await db.put(TABLE_NAME, newUser);
+      const command = new PutCommand({ 
+        TableName: tableName, 
+        Item: { email, ...newUser } // email is the primary key
+      });
+      await client.send(command);
     } catch (error: any) {
-      console.log('Something went wrong here', error)
-      // 4. If table doesn't exist, create it dynamically
-      if (error.name === "ResourceNotFoundException") {
-        console.log(`Table ${TABLE_NAME} not found. Creating it...`);
-        await db.createTable({
-          TableName: TABLE_NAME,
-          AttributeDefinitions: [
-            { AttributeName: "userId", AttributeType: "S" }
-          ],
-          KeySchema: [
-            { AttributeName: "userId", KeyType: "HASH" }
-          ],
-          ProvisionedThroughput: {
-            ReadCapacityUnits: 5,
-            WriteCapacityUnits: 5
-          }
-        });
-
-        // Wait for table to be ready and retry put
-        let retries = 10;
-        while (retries > 0) {
-          try {
-            // Wait 2 seconds between retries
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            await db.put(TABLE_NAME, newUser);
-            console.log(`Successfully created user in new table ${TABLE_NAME}`);
-            break;
-          } catch (retryError: any) {
-            if (retryError.name === "ResourceNotFoundException" || retryError.name === "TableCreatingException") {
-              retries--;
-              console.log(`Waiting for table ${TABLE_NAME} to be active... (${retries} retries left)`);
-            } else {
-              throw retryError;
-            }
-          }
-        }
-        
-        if (retries === 0) {
-          throw new Error("Table creation timed out");
-        }
-      } else {
-        throw error;
-      }
+      throw error;
     }
 
     return NextResponse.json(newUser, { status: 201 });

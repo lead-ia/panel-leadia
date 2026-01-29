@@ -6,6 +6,7 @@ export interface UserData {
   name?: string;
   phoneNumber?: string;
   photoURL?: string;
+  displayName?: string;
   createdAt?: string;
   settings?: Settings;
   [key: string]: any;
@@ -48,9 +49,9 @@ export class UserRepository implements IUserRepository {
     }
   }
 
-  async updateUser(userId: string, data: Partial<UserData>): Promise<UserData> {
+  async updateUser(userEmail: string, data: Partial<UserData>): Promise<UserData> {
     try {
-      const response = await fetch(`${this.baseUrl}/${userId}`, {
+      const response = await fetch(`${this.baseUrl}/${userEmail}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),

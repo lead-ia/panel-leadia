@@ -8,7 +8,7 @@ import React, {
   ReactNode,
 } from "react";
 import { useAuth } from "./auth-context";
-import { UserData } from "@/lib/repositories/user-repository";
+import { UserData, UserRepository } from "@/lib/repositories/user-repository";
 import { FirebaseUserRepository } from "@/lib/repositories/firebase-user-repository";
 import { Settings } from "@/types/settings";
 
@@ -30,7 +30,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const userRepository = new FirebaseUserRepository();
+  const userRepository = new UserRepository();
 
   const fetchDbUser = async () => {
     if (!firebaseUser) {
@@ -77,7 +77,10 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     if (!firebaseUser || !dbUser) return;
 
     try {
-      const updated = await userRepository.updateUser(firebaseUser.uid, data);
+      const updated = await userRepository.updateUser(
+        firebaseUser.email!,
+        data,
+      );
       setDbUser(updated);
     } catch (err) {
       console.error("Error updating user:", err);
@@ -99,7 +102,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     if (!firebaseUser || !dbUser) return;
 
     try {
-      await userRepository.updateSettings(firebaseUser.uid, newSettings);
+      await userRepository.updateSettings(firebaseUser.email!, newSettings);
       // Optimistically update local state
       setDbUser({
         ...dbUser,
