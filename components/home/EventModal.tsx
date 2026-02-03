@@ -10,12 +10,12 @@ interface EventModalProps {
 export function EventModal({ event, onClose }: EventModalProps) {
   // Extract initial values from the event object
   const initialDate = event.start.dateTime
-    ? new Date(event.start.dateTime).toISOString().split('T')[0]
-    : event.start.date || '';
+    ? new Date(event.start.dateTime).toISOString().split("T")[0]
+    : event.start.date || "";
 
   const initialTime = event.start.dateTime
     ? new Date(event.start.dateTime).toTimeString().substring(0, 5)
-    : '00:00'; // Default to 00:00 if no time is specified
+    : "00:00"; // Default to 00:00 if no time is specified
 
   const [date, setDate] = useState(initialDate);
   const [time, setTime] = useState(initialTime);
@@ -79,10 +79,14 @@ export function EventModal({ event, onClose }: EventModalProps) {
             </div>
             <p className="text-gray-700">{event.summary}</p>
             {event.creator?.email && (
-              <p className="text-sm text-gray-500">Criador: {event.creator.email}</p>
+              <p className="text-sm text-gray-500">
+                Criador: {event.creator.email}
+              </p>
             )}
             {event.organizer?.email && (
-              <p className="text-sm text-gray-500">Organizador: {event.organizer.email}</p>
+              <p className="text-sm text-gray-500">
+                Organizador: {event.organizer.email}
+              </p>
             )}
           </div>
 
@@ -96,7 +100,7 @@ export function EventModal({ event, onClose }: EventModalProps) {
               <input
                 type="date"
                 value={date}
-                onChange={(e) => setDate(e.target.value)}
+                disabled
                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6eb5d8] focus:border-transparent"
               />
               <p className="text-xs text-gray-500 mt-1">{formatDate(date)}</p>
@@ -110,7 +114,7 @@ export function EventModal({ event, onClose }: EventModalProps) {
               <input
                 type="time"
                 value={time}
-                onChange={(e) => setTime(e.target.value)}
+                disabled
                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6eb5d8] focus:border-transparent"
               />
             </div>
@@ -120,8 +124,8 @@ export function EventModal({ event, onClose }: EventModalProps) {
           <div>
             <label className="block text-sm text-gray-600 mb-2">Duração</label>
             <select
+              disabled
               value={duration}
-              onChange={(e) => setDuration(e.target.value)}
               className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6eb5d8] focus:border-transparent"
             >
               <option value="15min">15 minutos</option>
@@ -140,7 +144,7 @@ export function EventModal({ event, onClose }: EventModalProps) {
             </label>
             <textarea
               value={notes}
-              onChange={(e) => setNotes(e.target.value)}
+              disabled
               rows={3}
               className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6eb5d8] focus:border-transparent resize-none"
               placeholder="Adicione observações sobre o evento..."
@@ -151,7 +155,7 @@ export function EventModal({ event, onClose }: EventModalProps) {
         </div>
 
         {/* Actions */}
-        <div className="p-6 border-t bg-gray-50 rounded-b-2xl flex gap-3">
+        {/* <div className="p-6 border-t bg-gray-50 rounded-b-2xl flex gap-3">
           <button
             onClick={() => setShowCancelConfirm(true)}
             className="flex items-center gap-2 px-6 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors"
@@ -176,11 +180,11 @@ export function EventModal({ event, onClose }: EventModalProps) {
             <Save className="w-5 h-5" />
             Salvar Alterações
           </button>
-        </div>
+        </div> */}
       </div>
 
       {/* Cancel Confirmation Modal */}
-      {showCancelConfirm && (
+      {/* {showCancelConfirm && (
         <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
           <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md mx-4">
             <h3 className="text-xl text-[#1e3a5f] mb-4">
@@ -207,7 +211,7 @@ export function EventModal({ event, onClose }: EventModalProps) {
             </div>
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 }
