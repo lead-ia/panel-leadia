@@ -31,7 +31,7 @@ export class PatientsRepository implements IPatientsRepository {
       const patients = await response.json();
       return patients.map((patient: Patient) => ({
         ...patient,
-        hasAppointment: false,
+        hasAppointment: patient.hasAppointment || false,
       }));
     } catch (error) {
       console.error("PatientsRepository.getPatients error:", error);
