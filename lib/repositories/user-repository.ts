@@ -10,6 +10,12 @@ export interface UserData {
   createdAt?: string;
   settings?: Settings;
   [key: string]: any;
+  calendarInfo?: {
+    refresh_token: string;
+    access_token: string;
+    token_expiry: string;
+    email: string;
+  };
 }
 
 export interface IUserRepository {
