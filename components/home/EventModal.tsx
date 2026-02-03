@@ -1,102 +1,47 @@
-import { X, Calendar, Clock, User, Trash2, Save } from 'lucide-react';
-import { useState } from 'react';
+import { X, Calendar, Clock, User, Trash2, Save } from "lucide-react";
+import { useState } from "react";
+import { CalendarEvent } from "@/lib/repositories/calendar-repository";
 
 interface EventModalProps {
-  eventId: number;
+  event: CalendarEvent;
   onClose: () => void;
 }
 
-const eventData: Record<number, {
-  title: string;
-  patient: string;
-  date: string;
-  time: string;
-  duration: string;
-  color: string;
-  phone: string;
-  notes: string;
-}> = {
-  1: {
-    title: 'Consulta',
-    patient: 'Maria Silva',
-    date: '2025-01-10',
-    time: '09:00',
-    duration: '1h',
-    color: 'bg-blue-400',
-    phone: '+55 11 98765-4321',
-    notes: 'Consulta de rotina - Primeira vez',
-  },
-  2: {
-    title: 'Retorno',
-    patient: 'João Santos',
-    date: '2025-01-10',
-    time: '10:30',
-    duration: '30min',
-    color: 'bg-green-400',
-    phone: '+55 11 98765-1234',
-    notes: 'Retorno para avaliação de resultados',
-  },
-  3: {
-    title: 'Exame',
-    patient: 'Ana Oliveira',
-    date: '2025-01-10',
-    time: '14:00',
-    duration: '45min',
-    color: 'bg-yellow-400',
-    phone: '+55 11 98765-5678',
-    notes: 'Exame de sangue - Em jejum',
-  },
-  4: {
-    title: 'Consulta',
-    patient: 'Carlos Mendes',
-    date: '2025-01-10',
-    time: '15:30',
-    duration: '1h',
-    color: 'bg-purple-400',
-    phone: '+55 11 98765-9012',
-    notes: 'Consulta especializada',
-  },
-  5: {
-    title: 'Avaliação',
-    patient: 'Beatriz Costa',
-    date: '2025-01-10',
-    time: '17:00',
-    duration: '1h',
-    color: 'bg-pink-400',
-    phone: '+55 11 98765-3456',
-    notes: 'Avaliação inicial',
-  },
-};
+export function EventModal({ event, onClose }: EventModalProps) {
+  // Extract initial values from the event object
+  const initialDate = event.start.dateTime
+    ? new Date(event.start.dateTime).toISOString().split('T')[0]
+    : event.start.date || '';
 
-export function EventModal({ eventId, onClose }: EventModalProps) {
-  const event = eventData[eventId];
-  const [date, setDate] = useState(event?.date || '');
-  const [time, setTime] = useState(event?.time || '');
-  const [duration, setDuration] = useState(event?.duration || '');
-  const [notes, setNotes] = useState(event?.notes || '');
+  const initialTime = event.start.dateTime
+    ? new Date(event.start.dateTime).toTimeString().substring(0, 5)
+    : '00:00'; // Default to 00:00 if no time is specified
+
+  const [date, setDate] = useState(initialDate);
+  const [time, setTime] = useState(initialTime);
+  const [duration, setDuration] = useState("30min");
+  const [notes, setNotes] = useState(event.description || "");
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
-
-  if (!event) return null;
 
   const handleSave = () => {
     // Aqui você adicionaria a lógica para salvar as alterações
-    console.log('Salvando alterações:', { date, time, duration, notes });
+    console.log("Salvando alterações:", { date, time, duration, notes });
     onClose();
   };
 
   const handleCancel = () => {
     // Aqui você adicionaria a lógica para cancelar o agendamento
-    console.log('Cancelando agendamento:', eventId);
+    console.log("Cancelando agendamento:", event.id);
     setShowCancelConfirm(false);
     onClose();
   };
 
   const formatDate = (dateStr: string) => {
-    const d = new Date(dateStr + 'T00:00:00');
-    return d.toLocaleDateString('pt-BR', { 
-      day: '2-digit', 
-      month: 'long', 
-      year: 'numeric' 
+    const d = new Date(dateStr + "T00:00:00");
+    return d.toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
     });
   };
 
@@ -104,15 +49,15 @@ export function EventModal({ eventId, onClose }: EventModalProps) {
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl">
         {/* Header */}
-        <div className={`${event.color} text-white p-6 rounded-t-2xl`}>
+        <div className="bg-blue-400 text-white p-6 rounded-t-2xl">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
                 <Calendar className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-xl font-semibold">{event.title}</h3>
-                <p className="text-sm opacity-90">ID: #{eventId}</p>
+                <h3 className="text-xl font-semibold">{event.summary}</h3>
+                <p className="text-sm opacity-90">ID: #{event.id}</p>
               </div>
             </div>
             <button
@@ -126,14 +71,19 @@ export function EventModal({ eventId, onClose }: EventModalProps) {
 
         {/* Content */}
         <div className="p-6 space-y-6">
-          {/* Patient Info */}
+          {/* Event Info */}
           <div className="bg-gray-50 rounded-xl p-4">
             <div className="flex items-center gap-3 mb-2">
               <User className="w-5 h-5 text-[#1e3a5f]" />
-              <h4 className="text-[#1e3a5f] font-semibold">Paciente</h4>
+              <h4 className="text-[#1e3a5f] font-semibold">Evento</h4>
             </div>
-            <p className="text-gray-700">{event.patient}</p>
-            <p className="text-sm text-gray-500">{event.phone}</p>
+            <p className="text-gray-700">{event.summary}</p>
+            {event.creator?.email && (
+              <p className="text-sm text-gray-500">Criador: {event.creator.email}</p>
+            )}
+            {event.organizer?.email && (
+              <p className="text-sm text-gray-500">Organizador: {event.organizer.email}</p>
+            )}
           </div>
 
           {/* Date and Time */}
@@ -168,9 +118,7 @@ export function EventModal({ eventId, onClose }: EventModalProps) {
 
           {/* Duration */}
           <div>
-            <label className="block text-sm text-gray-600 mb-2">
-              Duração
-            </label>
+            <label className="block text-sm text-gray-600 mb-2">Duração</label>
             <select
               value={duration}
               onChange={(e) => setDuration(e.target.value)}
@@ -188,15 +136,17 @@ export function EventModal({ eventId, onClose }: EventModalProps) {
           {/* Notes */}
           <div>
             <label className="block text-sm text-gray-600 mb-2">
-              Observações
+              Descrição
             </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
               className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6eb5d8] focus:border-transparent resize-none"
-              placeholder="Adicione observações sobre o agendamento..."
-            />
+              placeholder="Adicione observações sobre o evento..."
+            >
+              {event.description}
+            </textarea>
           </div>
         </div>
 
@@ -207,18 +157,18 @@ export function EventModal({ eventId, onClose }: EventModalProps) {
             className="flex items-center gap-2 px-6 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors"
           >
             <Trash2 className="w-5 h-5" />
-            Cancelar Agendamento
+            Cancelar Evento
           </button>
-          
+
           <div className="flex-1"></div>
-          
+
           <button
             onClick={onClose}
             className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-colors"
           >
             Fechar
           </button>
-          
+
           <button
             onClick={handleSave}
             className="flex items-center gap-2 px-6 py-3 bg-[#6eb5d8] text-white rounded-xl hover:bg-[#5aa5c8] transition-colors"
@@ -233,9 +183,13 @@ export function EventModal({ eventId, onClose }: EventModalProps) {
       {showCancelConfirm && (
         <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
           <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md mx-4">
-            <h3 className="text-xl text-[#1e3a5f] mb-4">Confirmar Cancelamento</h3>
+            <h3 className="text-xl text-[#1e3a5f] mb-4">
+              Confirmar Cancelamento
+            </h3>
             <p className="text-gray-600 mb-6">
-              Tem certeza que deseja cancelar o agendamento de <strong>{event.patient}</strong> para o dia {formatDate(date)} às {time}?
+              Tem certeza que deseja cancelar o evento{" "}
+              <strong>{event.summary}</strong> para o dia {formatDate(date)} às{" "}
+              {time}?
             </p>
             <div className="flex gap-3">
               <button

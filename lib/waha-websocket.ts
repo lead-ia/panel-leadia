@@ -92,4 +92,10 @@ export class WahaWebsocket {
       callbacks.forEach(callback => callback(data));
     }
   }
+
+  public static destroyInstance() {
+    if (WahaWebsocket.instance) {
+      WahaWebsocket.instance.socket?.close();
+    }
+  }
 }

@@ -1,4 +1,4 @@
-import { Search, Clock, Tag } from "lucide-react";
+import { Search } from "lucide-react";
 import { ChatList } from "./ChatList";
 import { ChatModal } from "./ChatModal";
 import { useChat } from "@/hooks/use-chat";

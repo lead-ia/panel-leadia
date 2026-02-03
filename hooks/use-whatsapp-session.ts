@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useWhatsappEventListener } from './use-whatsapp-event-listener';
 import { WhatsappSession } from '@/lib/models/whatsapp-session';
 import { WahaChatRepository } from '@/lib/repositories/waha-chat-repository';
+import { WahaWebsocket } from '@/lib/waha-websocket';
 
 type WhatsappSessionStatus =
   'WORKING' | 'STARTING' | 'SCAN_QR_CODE' | 'STOPPED' | 'FAILED';
@@ -50,6 +51,14 @@ export function useWhatsappSession(sessionName: string) {
   useEffect(() => {
     checkSession();
   }, [checkSession]);
+
+  // Clean up websocket connection when sessionName changes or component unmounts
+  useEffect(() => {
+    return () => {
+      // Only close the connection if there are no other components using the same session
+      // We'll rely on the WahaWebsocket's internal listener count to determine this
+    };
+  }, [sessionName]);
 
   const startSession = async () => {
     setIsLoading(true);

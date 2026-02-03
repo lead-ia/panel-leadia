@@ -1,18 +1,18 @@
-"use client"
-import { useRouter } from "next/navigation"
-import Image from "next/image"
-import { LogOut, Settings, User, Mail } from "lucide-react"
-import { getAuth, signOut, updateProfile } from "firebase/auth"
-import { app } from "@/firebase"
-import { useAuth } from "../auth/auth-context"
-import { useState } from "react"
+"use client";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { LogOut, Settings, User, Mail } from "lucide-react";
+import { getAuth, signOut, updateProfile } from "firebase/auth";
+import { app } from "@/firebase";
+import { useAuth } from "../auth/auth-context";
+import { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -20,60 +20,63 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { WahaWebsocket } from "@/lib/waha-websocket";
 
 export function DashboardHeader() {
-  const router = useRouter()
-  const { user } = useAuth()
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  const [displayName, setDisplayName] = useState(user?.displayName || "")
-  const [photoURL, setPhotoURL] = useState(user?.photoURL || "")
-  const [isSaving, setIsSaving] = useState(false)
+  const router = useRouter();
+  const { user } = useAuth();
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [displayName, setDisplayName] = useState(user?.displayName || "");
+  const [photoURL, setPhotoURL] = useState(user?.photoURL || "");
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleLogout = async () => {
-    document.cookie = "token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax;"
-    await signOut(getAuth(app))
-    router.push("/login")
-  }
+    document.cookie =
+      "token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax;";
+    WahaWebsocket.destroyInstance();
+    await signOut(getAuth(app));
+    router.push("/login");
+  };
 
   const handleSaveProfile = async () => {
     try {
-      setIsSaving(true)
-      const auth = getAuth(app)
+      setIsSaving(true);
+      const auth = getAuth(app);
       if (auth.currentUser) {
         await updateProfile(auth.currentUser, {
           displayName: displayName || "User",
           photoURL: photoURL || null,
-        })
-        setIsEditDialogOpen(false)
+        });
+        setIsEditDialogOpen(false);
       }
     } catch (error) {
-      console.error("Error updating profile:", error)
+      console.error("Error updating profile:", error);
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
-  }
+  };
 
   const userInitials = (user?.displayName || user?.email || "U")
     .split(" ")
     .map((n) => n[0])
     .join("")
-    .toUpperCase()
+    .toUpperCase();
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/40 bg-gradient-to-r from-primary to-primary/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="w-32 h-16  rounded-xl flex items-center">
-            <Image
-              src="/logo.png"
-              alt="LeadIA Logo"
-              width={160}
-              height={40}
-              className="object-contain"
-            />
+        <div className="w-32 h-16  rounded-xl flex items-center">
+          <Image
+            src="/logo.png"
+            alt="LeadIA Logo"
+            width={160}
+            height={40}
+            className="object-contain"
+          />
         </div>
 
         <div className="flex items-center">
@@ -97,9 +100,7 @@ export function DashboardHeader() {
                   <p className="text-sm font-bold leading-none text-background">
                     {user?.displayName || "User"}
                   </p>
-                  <p className="text-xs text-white mt-0.5">
-                    {user?.email}
-                  </p>
+                  <p className="text-xs text-white mt-0.5">{user?.email}</p>
                 </div>
               </button>
             </DropdownMenuTrigger>
@@ -111,12 +112,15 @@ export function DashboardHeader() {
                 <p className="text-xs text-muted-foreground">{user?.email}</p>
               </div>
               <DropdownMenuSeparator />
-              <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+              <Dialog
+                open={isEditDialogOpen}
+                onOpenChange={setIsEditDialogOpen}
+              >
                 <DialogTrigger asChild>
                   <DropdownMenuItem
                     onSelect={(e) => {
-                      e.preventDefault()
-                      setIsEditDialogOpen(true)
+                      e.preventDefault();
+                      setIsEditDialogOpen(true);
                     }}
                   >
                     <Settings className="mr-2 h-4 w-4" />
@@ -126,9 +130,7 @@ export function DashboardHeader() {
                 <DialogContent className="sm:max-w-md">
                   <DialogHeader>
                     <DialogTitle>Editar Perfil</DialogTitle>
-                    <DialogDescription>
-                      Atualizar nome.
-                    </DialogDescription>
+                    <DialogDescription>Atualizar nome.</DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4">
                     <div className="space-y-2">
@@ -181,5 +183,5 @@ export function DashboardHeader() {
         </div>
       </div>
     </header>
-  )
+  );
 }

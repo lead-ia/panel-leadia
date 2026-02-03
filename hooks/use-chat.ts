@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
-import { ChatRepository, Conversation, IChatRepository } from '@/lib/repositories/chat-repository';
+import {  Conversation, IChatRepository } from '@/lib/repositories/chat-repository';
+import { useWhatsappSession } from './use-whatsapp-session';
 
 
 
 export function useChat(options?: { useWebsockets?: boolean; sessionName: string }) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const {sessionStatus} = useWhatsappSession(options?.sessionName || '');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -16,7 +18,7 @@ export function useChat(options?: { useWebsockets?: boolean; sessionName: string
   const [repository, setRepository] = useState<IChatRepository | null>(null);
 
   useEffect(() => {
-    if (!options?.sessionName) {
+    if (!options?.sessionName || sessionStatus !== 'WORKING') {
       return
     }
 
@@ -50,7 +52,7 @@ export function useChat(options?: { useWebsockets?: boolean; sessionName: string
     return () => {
       repo.removeMessageListener(handleNewMessage);
     };
-  }, [options?.useWebsockets, options?.sessionName]);
+  }, [options?.useWebsockets, options?.sessionName, sessionStatus]);
 
   useEffect(() => {
     if (!selectedChat || !repository || !options?.sessionName) return;

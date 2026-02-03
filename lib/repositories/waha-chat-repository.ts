@@ -221,7 +221,25 @@ async createSession(sessionName: string): Promise<void> {
     try {
       await axios.post(
         `${this.apiUrl}/api/sessions`,
-        { name: sessionName, start: true },
+        { name: sessionName, start: true,
+
+  config: {
+    webhooks: [
+      {
+        url: process.env.NEXT_PUBLIC_WAHA_WEBHOOK,
+        events: [
+          "message",
+          "session.status"
+        ],
+        retries: {
+          delaySeconds: 2,
+          attempts: 15,
+          policy: "exponential"
+        },
+      }
+    ]
+  }
+         },
         {
           headers: {
             'X-API-KEY': process.env.WAHA_API_KEY || process.env.NEXT_PUBLIC_WAHA_API_KEY,
