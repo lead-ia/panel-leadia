@@ -1,31 +1,24 @@
-import { useState } from 'react';
-import { Search } from 'lucide-react';
+import { useState } from "react";
+import { Search } from "lucide-react";
+import { usePatients } from "@/hooks/usePatients";
 
-interface Lead {
-  id: number;
-  nome: string;
-  cpf: string;
-  telefone: string;
-  dataCadastro: string;
-  consultaAgendada: boolean;
-}
+export default function LeadsPage() {
+  const { leads, loading, error, updatePatient } = usePatients();
+  const [searchTerm, setSearchTerm] = useState("");
 
-interface LeadsPageProps {
-  leads: Lead[];
-  onConfirmarConsulta: (leadId: number) => void;
-}
-
-export default function LeadsPage({ leads, onConfirmarConsulta }: LeadsPageProps) {
-  const [searchTerm, setSearchTerm] = useState('');
-
-  const filteredLeads = leads.filter(lead => {
+  const filteredLeads = leads.filter((lead) => {
     const search = searchTerm.toLowerCase();
     return (
-      lead.nome.toLowerCase().includes(search) ||
-      lead.cpf.includes(searchTerm) ||
-      lead.telefone.includes(searchTerm)
+      (lead.name && lead.name.toLowerCase().includes(search)) ||
+      (lead.document && lead.document.includes(searchTerm)) ||
+      (lead.phoneNumber && lead.phoneNumber.includes(searchTerm))
     );
   });
+
+  if (loading)
+    return <div className="p-6 text-center">Carregando leads...</div>;
+  if (error)
+    return <div className="p-6 text-center text-red-600">Erro: {error}</div>;
 
   return (
     <div className="bg-white rounded-3xl shadow-2xl overflow-hidden h-full flex flex-col">
@@ -69,24 +62,31 @@ export default function LeadsPage({ leads, onConfirmarConsulta }: LeadsPageProps
             <tbody className="divide-y divide-gray-200">
               {filteredLeads.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                  <td
+                    colSpan={5}
+                    className="px-6 py-8 text-center text-gray-500"
+                  >
                     Nenhum lead encontrado com os filtros aplicados
                   </td>
                 </tr>
               ) : (
                 filteredLeads.map((lead, index) => (
-                  <tr 
+                  <tr
                     key={lead.id}
                     className={`hover:bg-gray-50 transition-colors ${
-                      index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'
+                      index % 2 === 0 ? "bg-white" : "bg-gray-50/50"
                     }`}
                   >
-                    <td className="px-6 py-4 text-gray-800">{lead.nome}</td>
-                    <td className="px-6 py-4 text-gray-600">{lead.cpf}</td>
-                    <td className="px-6 py-4 text-gray-600">{lead.telefone}</td>
-                    <td className="px-6 py-4 text-gray-600">{lead.dataCadastro}</td>
+                    <td className="px-6 py-4 text-gray-800">{lead.name}</td>
+                    <td className="px-6 py-4 text-gray-600">{lead.document}</td>
+                    <td className="px-6 py-4 text-gray-600">
+                      {lead.phoneNumber}
+                    </td>
+                    <td className="px-6 py-4 text-gray-600">
+                      {lead.createdAt}
+                    </td>
                     <td className="px-6 py-4 text-center">
-                      {lead.consultaAgendada ? (
+                      {lead.hasAppointment ? (
                         <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
                           ✓ Consulta Agendada
                         </span>
@@ -106,23 +106,26 @@ export default function LeadsPage({ leads, onConfirmarConsulta }: LeadsPageProps
         {/* Stats */}
         <div className="mt-6 flex items-center justify-between">
           <p className="text-sm text-gray-600">
-            Exibindo <span className="text-[#1e3a5f]">{filteredLeads.length}</span> de{' '}
+            Exibindo{" "}
+            <span className="text-[#1e3a5f]">{filteredLeads.length}</span> de{" "}
             <span className="text-[#1e3a5f]">{leads.length}</span> leads
           </p>
           <div className="flex gap-4 text-sm">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-green-500"></div>
               <span className="text-gray-600">
-                Com consulta: <strong className="text-[#1e3a5f]">
-                  {filteredLeads.filter(l => l.consultaAgendada).length}
+                Com consulta:{" "}
+                <strong className="text-[#1e3a5f]">
+                  {filteredLeads.filter((l) => l.hasAppointment).length}
                 </strong>
               </span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-gray-400"></div>
               <span className="text-gray-600">
-                Sem consulta: <strong className="text-[#1e3a5f]">
-                  {filteredLeads.filter(l => !l.consultaAgendada).length}
+                Sem consulta:{" "}
+                <strong className="text-[#1e3a5f]">
+                  {filteredLeads.filter((l) => !l.hasAppointment).length}
                 </strong>
               </span>
             </div>

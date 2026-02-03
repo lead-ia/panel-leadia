@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { AuthProvider } from "@/components/auth/auth-context";
 import { UserProvider } from "@/components/auth/user-context";
+import { PatientsProvider } from "@/context/patients-context";
 import "./globals.css";
 
 const _geist = Geist({ subsets: ["latin"] });
@@ -22,7 +23,9 @@ export default function RootLayout({
     <html lang="en" className="h-full">
       <body className="font-sans antialiased h-full overflow-hidden">
         <AuthProvider>
-          <UserProvider>{children}</UserProvider>
+          <UserProvider>
+            <PatientsProvider>{children}</PatientsProvider>
+          </UserProvider>
         </AuthProvider>
         <Analytics />
       </body>

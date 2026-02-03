@@ -1,7 +1,7 @@
 "use client";
 
-import LeadsPage from "@/components/dashboard_new/LeadsPage";
+import LeadsPage from "@/components/leads/LeadsPage";
 
 export default function Page() {
-  return <LeadsPage leads={[]} onConfirmarConsulta={() => {}} />;
+  return <LeadsPage />;
 }
