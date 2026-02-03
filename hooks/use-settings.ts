@@ -1,51 +1,31 @@
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { Settings } from '@/types/settings';
-import { SettingsRepository } from '@/lib/settings-repository';
+import { useUser } from '@/components/auth/user-context';
 
 export function useSettings() {
-  const [settings, setSettings] = useState<Settings | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { dbUser, updateSettings: userUpdateSettings, loading: userLoading, error: userError } = useUser();
   const [upsertStatus, setUpsertStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
-  const repository = new SettingsRepository();
+  const settings = dbUser?.settings || null;
 
-  useEffect(() => {
-    loadSettings();
-  }, []);
-
-  const loadSettings = async () => {
-    setLoading(true);
-    try {
-      const data = await repository.readSettings();
-      setSettings(data);
-      setError(null);
-    } catch (err) {
-      setError('Failed to load settings');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const updateSettings = async (newSettings: Settings) => {
+  const updateSettings = async (updates: Partial<Settings>) => {
     setUpsertStatus('loading');
     try {
-      await repository.upsertSettings(newSettings);
-      setSettings(newSettings);
+      await userUpdateSettings(updates);
       setUpsertStatus('success');
       // Reset success status after a few seconds
       setTimeout(() => setUpsertStatus('idle'), 3000);
     } catch (err) {
       setUpsertStatus('error');
       console.error(err);
+      throw err;
     }
   };
 
   return {
     settings,
-    loading,
-    error,
+    loading: userLoading,
+    error: userError,
     updateSettings,
     upsertStatus
   };

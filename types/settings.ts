@@ -52,15 +52,27 @@ export interface FollowUpMessage {
   attachment?: string; // URL to PDF
 }
 
+export interface LeadFollowUpMessage {
+  id?: string | number;
+  title: string;
+  hour: number;
+  message: string;
+}
+
 export interface LeadFollowUpInfo {
-  basicGuidance: FollowUpMessage;
-  preConsultationGuidance: FollowUpMessage;
+  leadFollowUpMessages: LeadFollowUpMessage[];
+}
+
+export interface PatientFollowUpMessage {
+  id?: string | number;
+  date: string;
+  message: string;
 }
 
 export interface PatientFollowUpInfo {
   enabled: boolean;
-  frequencyDays: number;
-  message: string;
+  periodicMessage: string;
+  commemorativeMessages: PatientFollowUpMessage[];
 }
 
 export interface ReminderInfo {

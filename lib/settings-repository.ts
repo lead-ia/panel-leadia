@@ -61,20 +61,34 @@ const MOCK_SETTINGS: Settings = {
     acceptedMethods: ['PIX', 'Cartão de crédito'],
   },
   leadFollowUpInfo: {
-    basicGuidance: {
-      message:
-        'Sua consulta está confirmada! Lembre-se de chegar com 10 minutos de antecedência.',
-    },
-    preConsultationGuidance: {
-      message:
-        'Olá! Para a sua consulta de amanhã, por favor traga seus exames anteriores e documentos.',
-    },
+    leadFollowUpMessages: [
+      {
+        title: "Boas-vindas inicial",
+        hour: 0,
+        message: "Olá! Vi que você tem interesse em cuidar da sua saúde. Vamos focar no seu bem-estar e finalizar nosso agendamento? 💙",
+      },
+      {
+        title: "Primeiro follow-up",
+        hour: 24,
+        message: "Oi! Ainda estou aqui para te ajudar a agendar sua consulta. Vamos confirmar um horário que seja bom para você?",
+      },
+    ],
   },
   patientFollowUpInfo: {
     enabled: false,
-    frequencyDays: 30,
-    message:
-      'Olá [NOME]! Faz tempo que não nos vemos. Que tal agendar uma consulta de acompanhamento?',
+    periodicMessage: 'Olá [NOME]! Faz tempo que não nos vemos. Que tal agendar uma consulta de acompanhamento?',
+    commemorativeMessages: [
+      {
+        id: 1,
+        date: "01/01",
+        message: "Feliz Ano Novo! Desejamos um ano cheio de saúde e bem-estar! 🎉",
+      },
+      {
+        id: 2,
+        date: "25/12",
+        message: "Feliz Natal! Que esta data seja repleta de paz e alegria! 🎄",
+      },
+    ],
   },
   reminderInfo: {
     autoReminder24h: {

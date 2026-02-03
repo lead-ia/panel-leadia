@@ -22,8 +22,8 @@ import { IntegrationsSection } from "./sections/IntegrationsSection";
 import { AiPreferencesSection } from "./sections/AiPreferencesSection";
 import { AgendaSection } from "./sections/AgendaSection";
 import { PaymentMethodsSection } from "./sections/PaymentMethodsSection";
-import { LeadFollowUpSection } from "./sections/LeadFollowUpSection";
-import { PatientFollowUpSection } from "./sections/PatientFollowUpSection";
+import { LeadFollowUpUpdatedSection } from "./sections/LeadFollowUpUpdatedSection";
+import { PatientFollowUpUpdatedSection } from "./sections/PatientFollowUpUpdatedSection";
 import { RemindersSection } from "./sections/RemindersSection";
 
 type Section =
@@ -157,9 +157,11 @@ export function SettingsPage() {
                     {section.id === "formas-pagamento" && (
                       <PaymentMethodsSection />
                     )}
-                    {section.id === "followup-lead" && <LeadFollowUpSection />}
+                    {section.id === "followup-lead" && (
+                      <LeadFollowUpUpdatedSection />
+                    )}
                     {section.id === "followup-paciente" && (
-                      <PatientFollowUpSection />
+                      <PatientFollowUpUpdatedSection />
                     )}
                     {section.id === "lembretes" && <RemindersSection />}
                   </div>

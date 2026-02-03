@@ -98,18 +98,23 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const updateSettings = async (newSettings: Partial<Settings>) => {
+  const updateSettings = async (updates: Partial<Settings>) => {
     if (!firebaseUser || !dbUser) return;
 
+    // Merge updates with existing settings to send the COMPLETE object to the repository
+    const mergedSettings: Settings = {
+      ...(dbUser.settings || {}),
+      ...updates,
+    } as Settings;
+
     try {
-      await userRepository.updateSettings(firebaseUser.email!, newSettings);
-      // Optimistically update local state
+      // Send the whole settings object to avoid overriding other fields in the database
+      await userRepository.updateSettings(firebaseUser.email!, mergedSettings);
+
+      // Optimistically update local state with the merged object
       setDbUser({
         ...dbUser,
-        settings: {
-          ...(dbUser.settings || {}),
-          ...newSettings,
-        } as Settings,
+        settings: mergedSettings,
       });
     } catch (err) {
       console.error("Error updating settings:", err);
