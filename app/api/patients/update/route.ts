@@ -1,7 +1,7 @@
 import { db } from "@/lib/dynamodb";
 import { NextResponse } from "next/server";
 
-const TABLE_NAME = process.env.PATIENTS_TABLE || "patients";
+const TABLE_NAME = process.env.PATIENTS_TABLE;
 
 export async function POST(request: Request) {
   try {
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
         ReturnValues: "ALL_NEW"
     };
 
-    const result = await db.update(TABLE_NAME, key, params);
+    const result = await db.update(TABLE_NAME!, key, params);
     return NextResponse.json(result.Attributes);
 
   } catch (error: any) {

@@ -3,5 +3,9 @@
 import PatientsPage from "@/components/patients/PatientsPage";
 
 export default function Page() {
-  return <PatientsPage />;
+  return (
+    <div className="p-4 h-full overflow-hidden">
+      <PatientsPage />
+    </div>
+  );
 }

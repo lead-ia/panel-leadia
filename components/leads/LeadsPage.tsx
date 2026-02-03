@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Search } from "lucide-react";
 import { usePatients } from "@/hooks/usePatients";
+import { formatDate, formatCPF, formatPhoneNumber } from "@/lib/utils";
 
 export default function LeadsPage() {
   const { leads, loading, error, updatePatient } = usePatients();
@@ -10,8 +11,8 @@ export default function LeadsPage() {
     const search = searchTerm.toLowerCase();
     return (
       (lead.name && lead.name.toLowerCase().includes(search)) ||
-      (lead.document && lead.document.includes(searchTerm)) ||
-      (lead.phoneNumber && lead.phoneNumber.includes(searchTerm))
+      (lead.document && formatCPF(lead.document).includes(searchTerm)) ||
+      (lead.phoneNumber && formatPhoneNumber(lead.phoneNumber).includes(searchTerm))
     );
   });
 
@@ -78,12 +79,12 @@ export default function LeadsPage() {
                     }`}
                   >
                     <td className="px-6 py-4 text-gray-800">{lead.name}</td>
-                    <td className="px-6 py-4 text-gray-600">{lead.document}</td>
+                    <td className="px-6 py-4 text-gray-600">{formatCPF(lead.document)}</td>
                     <td className="px-6 py-4 text-gray-600">
-                      {lead.phoneNumber}
+                      {formatPhoneNumber(lead.phoneNumber)}
                     </td>
                     <td className="px-6 py-4 text-gray-600">
-                      {lead.createdAt}
+                      {formatDate(lead.createdAt)}
                     </td>
                     <td className="px-6 py-4 text-center">
                       {lead.hasAppointment ? (

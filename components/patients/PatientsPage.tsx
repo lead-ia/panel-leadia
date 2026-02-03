@@ -9,6 +9,7 @@ import {
   X,
 } from "lucide-react";
 import { usePatients } from "@/hooks/usePatients";
+import { formatDate, formatCPF, formatPhoneNumber } from "@/lib/utils";
 
 export default function PatientsPage() {
   const { patients, loading, error, updatePatient } = usePatients();
@@ -20,8 +21,10 @@ export default function PatientsPage() {
     const search = searchTerm.toLowerCase();
     return (
       (paciente.name && paciente.name.toLowerCase().includes(search)) ||
-      (paciente.document && paciente.document.includes(searchTerm)) ||
-      (paciente.phoneNumber && paciente.phoneNumber.includes(searchTerm))
+      (paciente.document &&
+        formatCPF(paciente.document).includes(searchTerm)) ||
+      (paciente.phoneNumber &&
+        formatPhoneNumber(paciente.phoneNumber).includes(searchTerm))
     );
   });
 
@@ -58,7 +61,7 @@ export default function PatientsPage() {
     return <div className="p-6 text-center text-red-600">Erro: {error}</div>;
 
   return (
-    <div className="bg-white rounded-3xl shadow-2xl overflow-hidden h-full flex flex-col">
+    <div className="bg-white rounded-3xl shadow-2xl h-full flex flex-col">
       {/* Header */}
       <div className="border-b border-gray-200 p-6 bg-white">
         <h1 className="text-[#1e3a5f] text-2xl">Pacientes</h1>
@@ -87,17 +90,17 @@ export default function PatientsPage() {
 
       {/* Table */}
       <div className="flex-1 overflow-auto p-6">
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="border border-gray-200 rounded-lg">
           <table className="w-full">
             <thead className="bg-gradient-to-r from-[#1e3a5f] to-[#6eb5d8] text-white">
               <tr>
-                <th className="px-6 py-4 text-left">Nome</th>
+                <th className="px-6 py-4 text-left rounded-tl-lg">Nome</th>
                 <th className="px-6 py-4 text-left">CPF</th>
                 <th className="px-6 py-4 text-left">Telefone</th>
                 <th className="px-6 py-4 text-left">Data de Cadastro</th>
                 <th className="px-6 py-4 text-center">Status Pagamento</th>
                 <th className="px-6 py-4 text-center">Comprovante</th>
-                <th className="px-6 py-4 text-center">Ações</th>
+                <th className="px-6 py-4 text-center rounded-tr-lg">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -122,14 +125,16 @@ export default function PatientsPage() {
                       {paciente.name || "-"}
                     </td>
                     <td className="px-6 py-4 text-gray-600">
-                      {paciente.document || "-"}
+                      {paciente.document ? formatCPF(paciente.document) : "-"}
                     </td>
                     <td className="px-6 py-4 text-gray-600">
-                      {paciente.phoneNumber || "-"}
+                      {paciente.phoneNumber
+                        ? formatPhoneNumber(paciente.phoneNumber)
+                        : "-"}
                     </td>
                     <td className="px-6 py-4 text-gray-600">
                       {paciente.createdAt
-                        ? new Date(paciente.createdAt).toLocaleDateString()
+                        ? formatDate(paciente.createdAt)
                         : "-"}
                     </td>
                     <td className="px-6 py-4 text-center">
