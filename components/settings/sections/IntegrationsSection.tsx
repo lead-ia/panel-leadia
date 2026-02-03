@@ -4,7 +4,8 @@ import { WhatsappConnect } from "../whatsapp-connect";
 import { Button } from "@/components/ui/button";
 
 export function IntegrationsSection() {
-  const { updateUser } = useUser();
+  const { updateUser, dbUser } = useUser();
+  const calendarIntegrated = dbUser?.calendarInfo !== null;
 
   async function handleConnectCalendar() {
     try {
@@ -60,7 +61,13 @@ export function IntegrationsSection() {
               </p>
             </div>
           </div>
-          <Button onClick={handleConnectCalendar}>Conectar</Button>
+          {calendarIntegrated ? (
+            <div className="py-2 px-4 bg-green-500 rounded-lg">
+              <p className="text-white text-md">Conectado</p>
+            </div>
+          ) : (
+            <Button onClick={handleConnectCalendar}>Conectar</Button>
+          )}
         </div>
       </div>
 
