@@ -51,6 +51,12 @@ export interface CalendarEvent {
   };
   eventType?: string;
   location?: string;
+  attendees?: {
+    email: string;
+    responseStatus?: string;
+    [key: string]: any;
+  }[];
+  patientName?: string | null;
   [key: string]: any;
 }
 
@@ -106,7 +112,62 @@ export class CalendarRepository implements ICalendarRepository {
 
       const data = await response.json();
       // Assuming the API returns an array of events or an object containing them
-      return Array.isArray(data) ? data : data.events || [];
+      const events: CalendarEvent[] = Array.isArray(data) ? data : data.events || [];
+
+      // Extract emails from attendees
+      const attendeeEmails = new Set<string>();
+      events.forEach((event) => {
+        if (event.attendees) {
+          event.attendees.forEach((attendee) => {
+            if (attendee.email) {
+              attendeeEmails.add(attendee.email);
+            }
+          });
+        }
+      });
+
+      if (attendeeEmails.size > 0) {
+        try {
+          // Fetch patients by emails
+          const patientsResponse = await fetch("/api/patients", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ emails: Array.from(attendeeEmails) }),
+          });
+
+          if (patientsResponse.ok) {
+            const patients = await patientsResponse.json();
+            
+            // Map emails to names
+            const emailToNameMap = new Map<string, string>();
+            patients.forEach((patient: { email: string; name: string }) => {
+              if (patient.email && patient.name) {
+                emailToNameMap.set(patient.email, patient.name);
+              }
+            });
+
+            // Enrich events with patientName
+            events.forEach((event) => {
+              event.patientName = null; // Default to null
+              if (event.attendees) {
+                for (const attendee of event.attendees) {
+                  if (attendee.email && emailToNameMap.has(attendee.email)) {
+                    event.patientName = emailToNameMap.get(attendee.email) || null;
+                    break; // Assume one patient per event or take the first found
+                  }
+                }
+              }
+            });
+          }
+        } catch (error) {
+           console.error("Failed to enrich events with patient names", error);
+           // We do not throw here to allow returning events even if enrichment fails
+        }
+      }
+
+      return events;
     } catch (error) {
       console.error("CalendarRepository.getEventsForInterval error:", error);
       throw error;

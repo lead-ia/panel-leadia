@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 
 export function IntegrationsSection() {
   const { updateUser, dbUser } = useUser();
-  const calendarIntegrated = dbUser?.calendarInfo !== null;
+  const calendarIntegrated = !!dbUser?.calendarInfo;
 
   async function handleConnectCalendar() {
     try {

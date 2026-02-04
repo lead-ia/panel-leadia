@@ -232,6 +232,7 @@ export function CalendarPanel() {
                     {events
                       .filter((e) => e.date === day.date)
                       .map((event) => {
+                        console.log(event);
                         const top = getEventPosition(event.time);
                         const height = getEventHeight(event.duration);
 
