@@ -13,7 +13,7 @@ export function BasicInfoSection() {
   const baseSettings: BasicInfo = {
     fullName: dbUser.name || dbUser.displayName || "",
     displayName: dbUser.displayName || "",
-    phoneNumber: dbUser.phoneNumber || "",
+    personalPhoneNumber: dbUser.personalPhoneNumber || "",
     specialty: "",
     subspecialty: "",
     crm: "",
@@ -46,8 +46,8 @@ export function BasicInfoSection() {
     setLocalData(newData);
     debouncedUpdate(newData);
 
-    // Sync with user document if displayName or phoneNumber changes
-    if (field === "displayName" || field === "phoneNumber") {
+    // Sync with user document if displayName or personalPhoneNumber changes
+    if (field === "displayName" || field === "personalPhoneNumber") {
       updateUser({
         [field]: value,
       });
@@ -96,6 +96,23 @@ export function BasicInfoSection() {
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
           />
         </div>
+        <div>
+          <label className="block text-sm text-gray-700 mb-2">
+            Telemóvel / WhatsApp *
+          </label>
+          <input
+            type="tel"
+            value={localData.personalPhoneNumber}
+            onChange={(e) =>
+              handleChange("personalPhoneNumber", e.target.value)
+            }
+            placeholder="Ex: 912 345 678"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm text-gray-700 mb-2">
             Subespecialidade (opcional)

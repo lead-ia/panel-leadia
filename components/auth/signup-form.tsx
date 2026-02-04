@@ -59,7 +59,7 @@ export function SignupForm() {
         userId: userCredential.user.uid,
         email: userCredential.user.email || formData.email,
         name: formData.fullName,
-        phoneNumber: formData.phoneNumber,
+        personalPhoneNumber: formData.phoneNumber,
         createdAt: new Date().toISOString(),
       });
 

@@ -7,6 +7,7 @@ export interface BasicInfo {
   uf: string;
   profilePicture?: string; // URL or base64
   bio?: string;
+  personalPhoneNumber?: string;
   phoneNumber?: string;
 }
 
