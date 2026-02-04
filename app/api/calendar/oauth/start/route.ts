@@ -5,8 +5,6 @@ export async function GET() {
   try {
     const apiUrl = process.env.URL_API_SERVICE_EXTERNAL;
 
-    console.log("Api URL: ", apiUrl);
-
     if (!apiUrl) {
       return NextResponse.json(
         { error: "URL_API_SERVICE_EXTERNAL not configured" },
