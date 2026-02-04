@@ -1,24 +1,26 @@
-import { useState, useCallback, useEffect } from 'react';
-import { useWhatsappEventListener } from './use-whatsapp-event-listener';
-import { WhatsappSession } from '@/lib/models/whatsapp-session';
-import { WahaChatRepository } from '@/lib/repositories/waha-chat-repository';
-import { WahaWebsocket } from '@/lib/waha-websocket';
+import { useState, useCallback, useEffect, useRef } from "react";
+import { useWhatsappEventListener } from "./use-whatsapp-event-listener";
+import { WhatsappSession } from "@/lib/models/whatsapp-session";
+import { WahaChatRepository } from "@/lib/repositories/waha-chat-repository";
 
 type WhatsappSessionStatus =
-  'WORKING' | 'STARTING' | 'SCAN_QR_CODE' | 'STOPPED' | 'FAILED';
-
+  | "WORKING"
+  | "STARTING"
+  | "SCAN_QR_CODE"
+  | "STOPPED"
+  | "FAILED";
 
 export function useWhatsappSession(sessionName: string) {
   const [session, setSession] = useState<WhatsappSession | null>(null);
-  const [sessionStatus, setSessionStatus] = useState<WhatsappSessionStatus| null >(null);
+  const [sessionStatus, setSessionStatus] =
+    useState<WhatsappSessionStatus | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const repository = new WahaChatRepository(sessionName);
 
   const handleSessionStatus = useCallback((data: any) => {
-    console.log('Session status update:', data);
-    if (data.event === 'session.status') {
+    if (data.event === "session.status") {
       setSession({
         session: data.session,
         me: data.me,
@@ -28,54 +30,52 @@ export function useWhatsappSession(sessionName: string) {
     }
   }, []);
 
-  useWhatsappEventListener(sessionName, 'session.status', handleSessionStatus);
+  useWhatsappEventListener(sessionName, "session.status", handleSessionStatus);
+
+  const lastCheckedSession = useRef<string | null>(null);
 
   const checkSession = useCallback(async () => {
-    if (!sessionName) return;
+    if (!sessionName || lastCheckedSession.current === sessionName) return;
+
+    lastCheckedSession.current = sessionName;
     setIsLoading(true);
     try {
       const data = await repository.getSessionByName(sessionName);
       if (data) {
-           setSessionStatus(data.status);
-           return;
+        setSessionStatus(data.status);
+        return;
       }
       // Means there's not session with that session name, let's create and start it
-      startSession();
+      await startSession();
     } catch (err) {
-      console.log('No session found: ', err)
+      console.log("No session found or error:", err);
+      // If we got an error, we might want to allow re-checking later
+      lastCheckedSession.current = null;
     } finally {
       setIsLoading(false);
     }
   }, [sessionName]);
 
   useEffect(() => {
-    checkSession();
-  }, [checkSession]);
-
-  // Clean up websocket connection when sessionName changes or component unmounts
-  useEffect(() => {
-    return () => {
-      // Only close the connection if there are no other components using the same session
-      // We'll rely on the WahaWebsocket's internal listener count to determine this
-    };
-  }, [sessionName]);
+    if (sessionName) {
+      checkSession();
+    }
+  }, [sessionName, checkSession]);
 
   const startSession = async () => {
     setIsLoading(true);
     setError(null);
     try {
       switch (sessionStatus) {
-        case 'FAILED':
-          await repository.restartSession(sessionName)
+        case "FAILED":
+          await repository.restartSession(sessionName);
           break;
-          case 'STOPPED':
-            await repository.startSession(sessionName)
-            break;
+        case "STOPPED":
+          await repository.startSession(sessionName);
+          break;
         default:
-          await repository.createSession(sessionName)
+          await repository.createSession(sessionName);
       }
-      // After starting, we expect updates via websocket, but we can also re-check
-      await checkSession();
     } catch (err) {
       console.error("Error starting session:", err);
       setError("Failed to start session");
