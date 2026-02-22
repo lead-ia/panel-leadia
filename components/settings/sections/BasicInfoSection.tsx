@@ -2,9 +2,12 @@ import { useState, useEffect, useRef } from "react";
 import { useUser } from "@/components/auth/user-context";
 import { BasicInfo, Settings } from "@/types/settings";
 import { useDebouncedCallback } from "@/hooks/use-debounce";
+import { useStorage } from "@/hooks/use-storage";
 
 export function BasicInfoSection() {
   const { dbUser, updateSettings, updateUser } = useUser();
+  const { upload, loading, error } = useStorage();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!dbUser) {
     return <></>;
@@ -51,6 +54,26 @@ export function BasicInfoSection() {
       updateUser({
         [field]: value,
       });
+    }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const key = await upload(file, "uploads/profile-pictures/");
+      // Construct the proxy URL
+      const proxyUrl = `/api/storage?key=${key}&redirect=true`;
+
+      handleChange("profilePicture", proxyUrl);
+
+      // Also update the top-level user photoURL for the header
+      updateUser({
+        photoURL: proxyUrl,
+      });
+    } catch (err) {
+      console.error("Failed to upload profile picture", err);
     }
   };
 
@@ -160,9 +183,40 @@ export function BasicInfoSection() {
         <label className="block text-sm text-gray-700 mb-2">
           Foto profissional
         </label>
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-          <p className="text-gray-500">Clique ou arraste uma imagem</p>
-          <p className="text-xs text-gray-400 mt-1">PNG, JPG até 5MB</p>
+        <div
+          onClick={() => fileInputRef.current?.click()}
+          className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors relative"
+        >
+          {loading ? (
+            <div className="absolute inset-0 flex items-center justify-center bg-white/50">
+              <span className="text-sm text-gray-500">Enviando...</span>
+            </div>
+          ) : null}
+
+          {localData.profilePicture ? (
+            <div className="flex flex-col items-center">
+              <img
+                src={localData.profilePicture}
+                alt="Profile"
+                className="w-24 h-24 rounded-full object-cover mb-2 border-2 border-gray-200"
+              />
+              <p className="text-sm text-blue-600">Alterar foto</p>
+            </div>
+          ) : (
+            <>
+              <p className="text-gray-500">Clique para selecionar uma imagem</p>
+              <p className="text-xs text-gray-400 mt-1">PNG, JPG até 5MB</p>
+            </>
+          )}
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/png, image/jpeg, image/jpg"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+          {error && <p className="text-xs text-red-500 mt-2">{error}</p>}
         </div>
       </div>
 
