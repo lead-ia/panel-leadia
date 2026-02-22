@@ -3,6 +3,7 @@ import { useUser } from "@/components/auth/user-context";
 import { BasicInfo, Settings } from "@/types/settings";
 import { useDebouncedCallback } from "@/hooks/use-debounce";
 import { useStorage } from "@/hooks/use-storage";
+import { maskPhone } from "@/utils";
 
 export function BasicInfoSection() {
   const { dbUser, updateSettings, updateUser } = useUser();
@@ -42,9 +43,11 @@ export function BasicInfoSection() {
   }, 1000);
 
   const handleChange = (field: keyof BasicInfo, value: any) => {
+    const finalValue =
+      field === "personalPhoneNumber" ? maskPhone(value) : value;
     const newData = {
       ...localData,
-      [field]: value,
+      [field]: finalValue,
     };
     setLocalData(newData);
     debouncedUpdate(newData);
@@ -129,7 +132,7 @@ export function BasicInfoSection() {
             onChange={(e) =>
               handleChange("personalPhoneNumber", e.target.value)
             }
-            placeholder="Ex: 912 345 678"
+            placeholder="Ex: (11) 98765-4321"
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
           />
         </div>

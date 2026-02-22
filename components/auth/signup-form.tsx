@@ -15,6 +15,8 @@ import {
 } from "firebase/auth";
 import { app } from "@/firebase";
 
+import { maskPhone } from "@/utils";
+
 export function SignupForm() {
   const [formData, setFormData] = useState({
     email: "",
@@ -30,7 +32,8 @@ export function SignupForm() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const newValue = name === "phoneNumber" ? maskPhone(value) : value;
+    setFormData((prev) => ({ ...prev, [name]: newValue }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -188,7 +191,7 @@ export function SignupForm() {
             id="phoneNumber"
             name="phoneNumber"
             type="tel"
-            placeholder="912 345 678"
+            placeholder="(11) 98765-4321"
             value={formData.phoneNumber}
             onChange={handleChange}
             className="w-full pl-10 pr-4 py-3 border border-input bg-background text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
