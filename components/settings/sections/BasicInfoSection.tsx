@@ -3,7 +3,7 @@ import { useUser } from "@/components/auth/user-context";
 import { BasicInfo, Settings } from "@/types/settings";
 import { useDebouncedCallback } from "@/hooks/use-debounce";
 import { useStorage } from "@/hooks/use-storage";
-import { maskPhone } from "@/utils";
+import { maskPhone, ufs } from "@/utils";
 
 export function BasicInfoSection() {
   const { dbUser, updateSettings, updateUser } = useUser();
@@ -171,13 +171,12 @@ export function BasicInfoSection() {
             onChange={(e) => handleChange("uf", e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
           >
-            <option>Selecione</option>
-            <option>SP</option>
-            <option>RJ</option>
-            <option>MG</option>
-            <option>RS</option>
-            <option>SC</option>
-            <option>PR</option>
+            <option value="">Selecione</option>
+            {ufs.map((uf) => (
+              <option key={uf.id_uf} value={uf.sigla}>
+                {uf.nome}
+              </option>
+            ))}
           </select>
         </div>
       </div>

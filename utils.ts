@@ -257,7 +257,7 @@ const countries = {
   ZW: "Zimbábue",
 };
 
-const ufs = [
+export const ufs = [
   {
     id_uf: 1,
     sigla: "AC",

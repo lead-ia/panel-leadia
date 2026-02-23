@@ -17,6 +17,8 @@ export interface ClinicInfo {
   onlineConsultationLink: string;
   standardDurationInPerson: string; // e.g., "60 minutos"
   standardDurationOnline: string; // e.g., "45 minutos"
+  billingAddressSameAsClinic?: boolean;
+  billingAddress?: string;
 }
 
 export interface AiPreferences {
@@ -96,3 +98,22 @@ export interface Settings {
   patientFollowUpInfo: PatientFollowUpInfo;
   reminderInfo: ReminderInfo;
 }
+
+export const FORBIDDEN_TOPICS = [
+  "Diagnóstico",
+  "Exames",
+  "Medicamentos",
+  "Ajuste de doses",
+  "Classificação de gravidade",
+  "Comentários sobre laudos",
+  "Questões emocionais sensíveis",
+];
+
+export const DEFAULT_AI_PREFERENCES: AiPreferences = {
+  initialQuestion: "Olá! Como posso ajudar você hoje?",
+  tone: "Acolhedor",
+  empathyLevel: "Empatia moderada (recomendado)",
+  forbiddenTopics: FORBIDDEN_TOPICS,
+  clinicalResponse:
+    "Entendo sua dúvida. Como sou uma assistente virtual, não posso realizar diagnósticos ou prescrever tratamentos. Recomendo agendar uma consulta para que possamos avaliar seu caso detalhadamente.",
+};

@@ -10,7 +10,7 @@ import React, {
 import { useAuth } from "./auth-context";
 import { UserData, UserRepository } from "@/lib/repositories/user-repository";
 import { FirebaseUserRepository } from "@/lib/repositories/firebase-user-repository";
-import { Settings } from "@/types/settings";
+import { Settings, DEFAULT_AI_PREFERENCES } from "@/types/settings";
 
 interface UserContextType {
   dbUser: UserData | null;
@@ -51,6 +51,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
           name: firebaseUser.displayName || "",
           photoURL: firebaseUser.photoURL || "",
           createdAt: new Date().toISOString(),
+          settings: {
+            aiPreferences: DEFAULT_AI_PREFERENCES,
+          } as Settings,
         };
         data = await userRepository.createUser(newUser);
       }
@@ -90,7 +93,16 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   const createUser = async (userData: UserData) => {
     try {
-      const created = await userRepository.createUser(userData);
+      // Add default settings on creation
+      const userWithDefaults: UserData = {
+        ...userData,
+        settings: {
+          ...userData.settings,
+          aiPreferences:
+            userData.settings?.aiPreferences || DEFAULT_AI_PREFERENCES,
+        } as Settings,
+      };
+      const created = await userRepository.createUser(userWithDefaults);
       setDbUser(created);
     } catch (err) {
       console.error("Error creating user:", err);
@@ -103,6 +115,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
     // Merge updates with existing settings to send the COMPLETE object to the repository
     const mergedSettings: Settings = {
+      aiPreferences: DEFAULT_AI_PREFERENCES, // Default if nothing exists
       ...(dbUser.settings || {}),
       ...updates,
     } as Settings;

@@ -1,6 +1,11 @@
 import { useState, useEffect } from "react";
 import { useUser } from "@/components/auth/user-context";
-import { AiPreferences, Settings } from "@/types/settings";
+import {
+  AiPreferences,
+  Settings,
+  DEFAULT_AI_PREFERENCES,
+  FORBIDDEN_TOPICS,
+} from "@/types/settings";
 import { useDebouncedCallback } from "@/hooks/use-debounce";
 
 export function AiPreferencesSection() {
@@ -9,16 +14,7 @@ export function AiPreferencesSection() {
     return <></>;
   }
 
-  const defaultAiPreferences: AiPreferences = {
-    initialQuestion: "Olá! Como posso ajudar você hoje?",
-    tone: "Acolhedor",
-    empathyLevel: "Empatia moderada (recomendado)",
-    forbiddenTopics: [],
-    clinicalResponse:
-      "Entendo sua dúvida. Como sou uma assistente virtual, não posso realizar diagnósticos ou prescrever tratamentos. Recomendo agendar uma consulta para que possamos avaliar seu caso detalhadamente.",
-  };
-
-  const data = dbUser?.settings?.aiPreferences || defaultAiPreferences;
+  const data = dbUser?.settings?.aiPreferences || DEFAULT_AI_PREFERENCES;
 
   const [localData, setLocalData] = useState<AiPreferences>(data);
 
@@ -142,15 +138,7 @@ export function AiPreferencesSection() {
           Por segurança, marque os tópicos que a IA NUNCA deve abordar:
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {[
-            "Diagnóstico",
-            "Exames",
-            "Medicamentos",
-            "Ajuste de doses",
-            "Classificação de gravidade",
-            "Comentários sobre laudos",
-            "Questões emocionais sensíveis",
-          ].map((assunto) => (
+          {FORBIDDEN_TOPICS.map((assunto) => (
             <label
               key={assunto}
               className="flex items-center gap-2 p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer"
