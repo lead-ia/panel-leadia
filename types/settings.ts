@@ -37,11 +37,18 @@ export interface AvailabilitySlot {
   futureSchedulingDays: number;
 }
 
+export interface Block {
+  id: string;
+  start: string; // ISO date string
+  end: string; // ISO date string
+  reason?: string;
+}
+
 export interface Availability {
   services: string[]; // ['Consulta presencial', 'Consulta online']
   online: AvailabilitySlot;
   inPerson: AvailabilitySlot;
-  // blocks: Block[]; // Not fully defined in UI yet, skipping for now
+  blocks: Block[];
 }
 
 export interface PaymentMethods {

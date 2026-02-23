@@ -43,10 +43,10 @@ const monthNames = [
 
 export function useCalendar(dbUser: UserData | null) {
   const today = useMemo(() => new Date(), []);
-  
+
   // State from view
   const [selectedDay, setSelectedDay] = useState(today.getDate());
-  
+
   // Calculate the start of the current week (Sunday)
   const weekStartDate = useMemo(() => {
     const d = new Date(today);
@@ -54,7 +54,9 @@ export function useCalendar(dbUser: UserData | null) {
     return d;
   }, [today]);
 
-  const [currentWeekStart, setCurrentWeekStart] = useState(weekStartDate.getDate());
+  const [currentWeekStart, setCurrentWeekStart] = useState(
+    weekStartDate.getDate(),
+  );
   const [currentMonth, setCurrentMonth] = useState(weekStartDate.getMonth());
   const [currentYear, setCurrentYear] = useState(weekStartDate.getFullYear());
   const [viewMode, setViewMode] = useState<ViewMode>("week");
@@ -77,11 +79,19 @@ export function useCalendar(dbUser: UserData | null) {
       let endDate: string;
 
       if (viewMode === "day") {
-        const range = getDayRangeInTimezone(currentYear, currentMonth, selectedDay);
+        const range = getDayRangeInTimezone(
+          currentYear,
+          currentMonth,
+          selectedDay,
+        );
         startDate = range.start;
         endDate = range.end;
       } else if (viewMode === "week") {
-        const range = getWeekRangeInTimezone(currentYear, currentMonth, currentWeekStart);
+        const range = getWeekRangeInTimezone(
+          currentYear,
+          currentMonth,
+          currentWeekStart,
+        );
         startDate = range.start;
         endDate = range.end;
       } else {
@@ -120,7 +130,7 @@ export function useCalendar(dbUser: UserData | null) {
           time: getTimeInTimezone(start, userTimezone),
           duration:
             durationMin >= 60
-              ? `${Math.floor(durationMin / 60)}h`
+              ? `${Math.floor(durationMin / 60)}h${durationMin % 60 > 0 ? durationMin % 60 : ""}`
               : `${durationMin}min`,
           color: "bg-blue-400", // Default color
           patient: e.description || "Sem descrição",
@@ -184,11 +194,18 @@ export function useCalendar(dbUser: UserData | null) {
 
   const headerTitle = useMemo(() => {
     if (viewMode === "week") {
-      const weekEndDate = new Date(currentYear, currentMonth, currentWeekStart + 6);
+      const weekEndDate = new Date(
+        currentYear,
+        currentMonth,
+        currentWeekStart + 6,
+      );
       const weekEndDay = weekEndDate.getDate();
       const weekEndMonth = monthNames[weekEndDate.getMonth()];
 
-      if (currentMonth === weekEndDate.getMonth() && currentYear === weekEndDate.getFullYear()) {
+      if (
+        currentMonth === weekEndDate.getMonth() &&
+        currentYear === weekEndDate.getFullYear()
+      ) {
         return `${currentWeekStart} - ${weekEndDay} de ${monthNames[currentMonth]} ${currentYear}`;
       } else {
         return `${currentWeekStart} ${monthNames[currentMonth]} - ${weekEndDay} ${weekEndMonth} ${currentYear}`;
@@ -201,14 +218,24 @@ export function useCalendar(dbUser: UserData | null) {
 
   const filteredEvents = useMemo(() => {
     if (viewMode === "day") {
-      const targetDate = getDateInTimezone(new Date(currentYear, currentMonth, selectedDay));
+      const targetDate = getDateInTimezone(
+        new Date(currentYear, currentMonth, selectedDay),
+      );
       return events.filter((e) => e.date === targetDate);
     }
     if (viewMode === "week") {
       return events.filter((e) => {
         const eventDate = new Date(e.date);
-        const weekStartDate = new Date(currentYear, currentMonth, currentWeekStart);
-        const weekEndDate = new Date(currentYear, currentMonth, currentWeekStart + 6);
+        const weekStartDate = new Date(
+          currentYear,
+          currentMonth,
+          currentWeekStart,
+        );
+        const weekEndDate = new Date(
+          currentYear,
+          currentMonth,
+          currentWeekStart + 6,
+        );
 
         const eventDateStr = getDateInTimezone(eventDate);
         const weekStartStr = getDateInTimezone(weekStartDate);
@@ -225,7 +252,14 @@ export function useCalendar(dbUser: UserData | null) {
         eventDate.getFullYear() === currentYear
       );
     });
-  }, [events, viewMode, currentYear, currentMonth, currentWeekStart, selectedDay]);
+  }, [
+    events,
+    viewMode,
+    currentYear,
+    currentMonth,
+    currentWeekStart,
+    selectedDay,
+  ]);
 
   return {
     events: filteredEvents,

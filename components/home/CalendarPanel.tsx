@@ -116,9 +116,16 @@ export function CalendarPanel() {
   };
 
   const getEventHeight = (duration: string) => {
-    const minutes = duration.includes("h")
-      ? (parseInt(duration) || 1) * 60
-      : parseInt(duration) || 30;
+    let minutes = 0;
+    if (duration.includes("h")) {
+      const portions = duration.split("h");
+      minutes += (parseInt(portions[0]) || 0) * 60;
+      if (portions[1]) {
+        minutes += parseInt(portions[1]) || 0;
+      }
+    } else {
+      minutes = parseInt(duration) || 30;
+    }
     return (minutes / 60) * 40;
   };
 

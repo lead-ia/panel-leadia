@@ -19,7 +19,30 @@ export function EventModal({ event, onClose }: EventModalProps) {
 
   const [date, setDate] = useState(initialDate);
   const [time, setTime] = useState(initialTime);
-  const [duration, setDuration] = useState("30min");
+  // Calculate duration
+  const start = event.start.dateTime
+    ? new Date(event.start.dateTime)
+    : event.start.date
+      ? new Date(event.start.date)
+      : new Date();
+  const end = event.end.dateTime
+    ? new Date(event.end.dateTime)
+    : event.end.date
+      ? new Date(event.end.date)
+      : new Date();
+  const durationMs = Math.max(0, end.getTime() - start.getTime());
+  const durationMin = Math.round(durationMs / (1000 * 60));
+
+  const durationValue =
+    durationMin >= 60
+      ? `${Math.floor(durationMin / 60)}h${durationMin % 60 > 0 ? durationMin % 60 : ""}`
+      : `${durationMin}min`;
+
+  // Standard durations for the select
+  const standardDurations = ["15min", "30min", "45min", "1h", "1h30", "2h"];
+  const isCustomDuration = !standardDurations.includes(durationValue);
+
+  const [duration, setDuration] = useState(durationValue);
   const [notes, setNotes] = useState(event.description || "");
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
@@ -43,6 +66,17 @@ export function EventModal({ event, onClose }: EventModalProps) {
       month: "long",
       year: "numeric",
     });
+  };
+
+  const formatDurationDisplay = (val: string) => {
+    if (val.includes("min")) return val.replace("min", " minutos");
+    if (val.includes("h")) {
+      const parts = val.split("h");
+      const h = parts[0] + (parseInt(parts[0]) === 1 ? " hora" : " horas");
+      const m = parts[1] ? ` e ${parts[1]} minutos` : "";
+      return h + m;
+    }
+    return val;
   };
 
   return (
@@ -134,6 +168,11 @@ export function EventModal({ event, onClose }: EventModalProps) {
               <option value="1h">1 hora</option>
               <option value="1h30">1 hora e 30 minutos</option>
               <option value="2h">2 horas</option>
+              {isCustomDuration && (
+                <option value={duration}>
+                  {formatDurationDisplay(duration)}
+                </option>
+              )}
             </select>
           </div>
 

@@ -14,6 +14,8 @@ export function LeadFollowUpUpdatedSection() {
     message: "",
   });
   const [isAdding, setIsAdding] = useState(false);
+  const [hourInput, setHourInput] = useState<string>("0");
+  const [editHourInput, setEditHourInput] = useState<string>("0");
 
   // Sync with settings when loaded
   useEffect(() => {
@@ -35,16 +37,21 @@ export function LeadFollowUpUpdatedSection() {
 
   const handleAdd = () => {
     if (newMessage.title && newMessage.message) {
-      const updatedMessages = [...messages, { ...newMessage, id: Date.now() }];
+      const updatedMessages = [
+        ...messages,
+        { ...newMessage, hour: parseInt(hourInput) || 0, id: Date.now() },
+      ];
       setMessages(updatedMessages);
       persistSettings(updatedMessages);
       setNewMessage({ title: "", hour: 0, message: "" });
+      setHourInput("0");
       setIsAdding(false);
     }
   };
 
   const handleEdit = (index: number) => {
     setEditingIndex(index);
+    setEditHourInput(messages[index].hour.toString());
   };
 
   const handleSaveEdit = (index: number, updatedMsg: LeadFollowUpMessage) => {
@@ -68,6 +75,34 @@ export function LeadFollowUpUpdatedSection() {
     setEditingIndex(null);
     setIsAdding(false);
     setNewMessage({ title: "", hour: 0, message: "" });
+    setHourInput("0");
+  };
+
+  const templates: LeadFollowUpMessage[] = [
+    {
+      title: "Boas-vindas e ajuda",
+      hour: 0,
+      message:
+        "Olá! Vi que você se interessou pelo nosso atendimento. Gostaria de tirar alguma dúvida ou agendar uma conversa inicial?",
+    },
+    {
+      title: "Retomada de contato",
+      hour: 24,
+      message:
+        "Oi! Notei que você iniciou o contato mas ainda não marcamos. Se precisar de ajuda com os horários ou informações sobre valores, estou à disposição!",
+    },
+    {
+      title: "Últimas vagas",
+      hour: 48,
+      message:
+        "Olá! Tudo bem? Passando para te lembrar que estamos com alguns horários disponíveis para esta semana. Gostaria de garantir o seu?",
+    },
+  ];
+
+  const handleSelectTemplate = (template: LeadFollowUpMessage) => {
+    const updatedMessages = [...messages, { ...template, id: Date.now() }];
+    setMessages(updatedMessages);
+    persistSettings(updatedMessages);
   };
 
   if (loading)
@@ -126,16 +161,14 @@ export function LeadFollowUpUpdatedSection() {
                     Enviar após (horas)
                   </label>
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
                     placeholder="Ex: 24"
-                    min="0"
-                    value={newMessage.hour}
-                    onChange={(e) =>
-                      setNewMessage({
-                        ...newMessage,
-                        hour: parseInt(e.target.value) || 0,
-                      })
-                    }
+                    value={hourInput}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[^0-9]/g, "");
+                      setHourInput(val);
+                    }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
                   />
                 </div>
@@ -209,10 +242,14 @@ export function LeadFollowUpUpdatedSection() {
                           Enviar após (horas)
                         </label>
                         <input
-                          type="number"
+                          type="text"
+                          inputMode="numeric"
                           defaultValue={msg.hour}
-                          min="0"
-                          id={`edit-hour-${index}`}
+                          value={editHourInput}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/[^0-9]/g, "");
+                            setEditHourInput(val);
+                          }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
                         />
                       </div>
@@ -242,14 +279,7 @@ export function LeadFollowUpUpdatedSection() {
                               `edit-title-${index}`,
                             ) as HTMLInputElement
                           ).value;
-                          const hour =
-                            parseInt(
-                              (
-                                document.getElementById(
-                                  `edit-hour-${index}`,
-                                ) as HTMLInputElement
-                              ).value,
-                            ) || 0;
+                          const hour = parseInt(editHourInput) || 0;
                           const messageText = (
                             document.getElementById(
                               `edit-message-${index}`,
@@ -314,6 +344,39 @@ export function LeadFollowUpUpdatedSection() {
             72h depois. Seja empático e focado em ajudar o paciente a dar o
             próximo passo.
           </p>
+        </div>
+      </div>
+
+      <div className="border border-gray-200 rounded-lg p-5 bg-white shadow-sm">
+        <h3 className="text-[#1e3a5f] font-semibold mb-4 flex items-center gap-2">
+          <Zap className="w-5 h-5 text-yellow-500" />
+          Sugestões Prontas
+        </h3>
+        <p className="text-sm text-gray-500 mb-4">
+          Clique em uma sugestão abaixo para adicioná-la automaticamente à sua
+          sequência de follow-up.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {templates.map((template, i) => (
+            <button
+              key={i}
+              onClick={() => handleSelectTemplate(template)}
+              className="text-left p-4 border border-gray-100 rounded-xl bg-gray-50 hover:bg-orange-50 hover:border-orange-200 transition-all group"
+            >
+              <div className="flex justify-between items-start mb-2">
+                <span className="text-xs font-bold text-orange-600 uppercase tracking-wider">
+                  {template.hour}h {template.hour === 0 ? "(Imediato)" : ""}
+                </span>
+                <Plus className="w-4 h-4 text-gray-300 group-hover:text-orange-500" />
+              </div>
+              <h4 className="text-sm font-bold text-[#1e3a5f] mb-2">
+                {template.title}
+              </h4>
+              <p className="text-xs text-gray-600 italic">
+                "{template.message}"
+              </p>
+            </button>
+          ))}
         </div>
       </div>
     </div>
