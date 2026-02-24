@@ -12,6 +12,7 @@ import {
   PatientsRepository,
   Patient,
 } from "@/lib/repositories/patients-repository";
+import { useAuth } from "@/components/auth/auth-context";
 
 interface PatientsContextType {
   allPatients: Patient[];
@@ -53,9 +54,16 @@ export function PatientsProvider({ children }: { children: React.ReactNode }) {
     [allPatients.length, repository],
   );
 
+  const { user } = useAuth();
+
   useEffect(() => {
-    fetchPatients(true);
-  }, []); // Run only once on mount
+    if (user) {
+      fetchPatients(true);
+    } else {
+      setAllPatients([]);
+      setLoading(false);
+    }
+  }, [user, fetchPatients]); // Run on mount and when user changes
 
   const updatePatient = async (id: string, data: Partial<Patient>) => {
     try {

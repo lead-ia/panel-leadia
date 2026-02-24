@@ -17,7 +17,13 @@ export function PatientFollowUpUpdatedSection() {
     });
   const [isAdding, setIsAdding] = useState(false);
   const [periodicEnabled, setPeriodicEnabled] = useState(false);
+  const [daysAfterInput, setDaysAfterInput] = useState<string>("30");
   const [periodicMessage, setPeriodicMessage] = useState("");
+  const [birthdayEnabled, setBirthdayEnabled] = useState(false);
+  const [birthdayMessage, setBirthdayMessage] = useState("");
+
+  const defaultBirthdayMessage =
+    "Feliz aniversário, [NOME]! Desejamos muita saúde, alegria e realizações no seu dia especial. 🎉";
 
   // Sync with settings when loaded
   useEffect(() => {
@@ -26,9 +32,16 @@ export function PatientFollowUpUpdatedSection() {
         settings.patientFollowUpInfo.commemorativeMessages || [],
       );
       setPeriodicEnabled(settings.patientFollowUpInfo.enabled || false);
+      setDaysAfterInput(
+        (settings.patientFollowUpInfo.daysAfter ?? 30).toString(),
+      );
       setPeriodicMessage(settings.patientFollowUpInfo.periodicMessage || "");
+      setBirthdayEnabled(settings.patientFollowUpInfo.birthdayEnabled || false);
+      setBirthdayMessage(
+        settings.patientFollowUpInfo.birthdayMessage || defaultBirthdayMessage,
+      );
     }
-  }, [settings]);
+  }, [settings, defaultBirthdayMessage]);
 
   const persistSettings = (overrides: any = {}) => {
     if (settings) {
@@ -43,10 +56,22 @@ export function PatientFollowUpUpdatedSection() {
             overrides.periodicMessage !== undefined
               ? overrides.periodicMessage
               : periodicMessage,
+          daysAfter:
+            overrides.daysAfter !== undefined
+              ? overrides.daysAfter
+              : parseInt(daysAfterInput) || 0,
           commemorativeMessages:
             overrides.commemorativeMessages !== undefined
               ? overrides.commemorativeMessages
               : commemorativeMessages,
+          birthdayEnabled:
+            overrides.birthdayEnabled !== undefined
+              ? overrides.birthdayEnabled
+              : birthdayEnabled,
+          birthdayMessage:
+            overrides.birthdayMessage !== undefined
+              ? overrides.birthdayMessage
+              : birthdayMessage,
         },
       });
     }
@@ -110,6 +135,19 @@ export function PatientFollowUpUpdatedSection() {
     persistSettings({ periodicMessage });
   };
 
+  const handleToggleBirthday = (enabled: boolean) => {
+    setBirthdayEnabled(enabled);
+    persistSettings({ birthdayEnabled: enabled });
+  };
+
+  const handleBirthdayMessageChange = (msg: string) => {
+    setBirthdayMessage(msg);
+  };
+
+  const handleBirthdayMessageBlur = () => {
+    persistSettings({ birthdayMessage });
+  };
+
   if (loading)
     return <div className="p-4 text-center">Carregando configurações...</div>;
   if (error)
@@ -137,6 +175,25 @@ export function PatientFollowUpUpdatedSection() {
             <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#6eb5d8]"></div>
           </label>
         </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Enviar quantos dias após a consulta?
+          </label>
+          <div className="flex items-center gap-3">
+            <input
+              type="text"
+              inputMode="numeric"
+              value={daysAfterInput}
+              onChange={(e) => {
+                const val = e.target.value.replace(/[^0-9]/g, "");
+                setDaysAfterInput(val);
+              }}
+              onBlur={() => persistSettings()}
+              className="w-24 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
+            />
+            <span className="text-sm text-gray-500">dias</span>
+          </div>
+        </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -151,6 +208,46 @@ export function PatientFollowUpUpdatedSection() {
           />
           <p className="text-xs text-gray-500 mt-1">
             Use [NOME] para inserir o nome do paciente
+          </p>
+        </div>
+      </div>
+
+      <div className="border border-gray-200 rounded-lg p-5 bg-pink-50">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="text-[#1e3a5f] font-semibold">
+              Mensagem de Aniversário
+            </h3>
+            <p className="text-xs text-gray-500 mt-1">
+              Envie automaticamente uma saudação carinhosa no dia do aniversário
+              do paciente
+            </p>
+          </div>
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={birthdayEnabled}
+              onChange={(e) => handleToggleBirthday(e.target.checked)}
+              className="sr-only peer"
+            />
+            <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-400"></div>
+          </label>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Mensagem de Feliz Aniversário
+          </label>
+          <textarea
+            rows={3}
+            value={birthdayMessage}
+            onChange={(e) => handleBirthdayMessageChange(e.target.value)}
+            onBlur={handleBirthdayMessageBlur}
+            placeholder={defaultBirthdayMessage}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300"
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            Use [NOME] para inserir o nome do aniversariante
           </p>
         </div>
       </div>

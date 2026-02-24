@@ -81,13 +81,17 @@ export interface PatientFollowUpMessage {
 
 export interface PatientFollowUpInfo {
   enabled: boolean;
+  daysAfter: number;
   periodicMessage: string;
+  birthdayEnabled: boolean;
+  birthdayMessage: string;
   commemorativeMessages: PatientFollowUpMessage[];
 }
 
 export interface ReminderInfo {
   autoReminder24h: {
     enabled: boolean;
+    hoursBefore: number;
     message: string;
   };
   autoConfirmationDay: {

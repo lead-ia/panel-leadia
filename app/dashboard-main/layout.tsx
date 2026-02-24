@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-context";
 import DashboardHeader from "@/components/home/dashboard-header";
 import { Footer } from "@/components/core/Footer";
+import { PatientsProvider } from "@/context/patients-context";
 
 export default function DashboardLayout({
   children,
@@ -30,7 +31,7 @@ export default function DashboardLayout({
         <DashboardHeader />
       </div>
       <main className="flex-1 min-h-0 overflow-hidden flex flex-col max-w-screen-2xl mx-auto w-full">
-        {children}
+        <PatientsProvider>{children}</PatientsProvider>
       </main>
       <div className="flex-shrink-0">
         <Footer />

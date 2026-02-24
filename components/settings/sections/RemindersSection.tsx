@@ -12,6 +12,7 @@ export function RemindersSection() {
   const defaultReminderInfo: ReminderInfo = {
     autoReminder24h: {
       enabled: true,
+      hoursBefore: 24,
       message:
         "Olá! Lembrete de sua consulta amanhã às [HORA]. Por favor, confirme sua presença.",
     },
@@ -61,7 +62,10 @@ export function RemindersSection() {
       <div className="border border-gray-200 rounded-lg p-5 bg-blue-50">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-[#1e3a5f]">Lembrete automático (24h antes)</h3>
+            <h3 className="text-[#1e3a5f]">
+              Lembrete automático ({localData.autoReminder24h.hoursBefore}h
+              antes)
+            </h3>
             <p className="text-xs text-gray-500 mt-1">
               Enviar lembrete aos pacientes
             </p>
@@ -77,6 +81,24 @@ export function RemindersSection() {
             />
             <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#6eb5d8]"></div>
           </label>
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm text-gray-700 mb-2">
+            Enviar quanto tempo antes?
+          </label>
+          <select
+            value={localData.autoReminder24h.hoursBefore}
+            onChange={(e) =>
+              handleAutoReminderChange("hoursBefore", parseInt(e.target.value))
+            }
+            className="w-full md:w-32 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8] bg-white"
+          >
+            {Array.from({ length: 24 }, (_, i) => i + 1).map((hour) => (
+              <option key={hour} value={hour}>
+                {hour} {hour === 1 ? "hora" : "horas"}
+              </option>
+            ))}
+          </select>
         </div>
         <div>
           <label className="block text-sm text-gray-700 mb-2">
