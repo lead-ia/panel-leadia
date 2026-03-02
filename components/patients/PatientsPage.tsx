@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Search,
   MoreVertical,
@@ -10,14 +10,77 @@ import {
 } from "lucide-react";
 import { usePatients } from "@/hooks/usePatients";
 import { formatDate, formatCPF, formatPhoneNumber } from "@/lib/utils";
+import {
+  Payment,
+  PaymentsRepository,
+} from "@/lib/repositories/payments-repository";
+import { FilesRepository } from "@/lib/repositories/files-repository";
+import { Loader2 } from "lucide-react";
 
 export default function PatientsPage() {
   const { patients, loading, error, updatePatient } = usePatients();
   const [searchTerm, setSearchTerm] = useState("");
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [comprovanteModal, setComprovanteModal] = useState<string | null>(null);
+  const [signedUrl, setSignedUrl] = useState<string | null>(null);
+  const [loadingUrl, setLoadingUrl] = useState(false);
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [loadingPayments, setLoadingPayments] = useState(true);
 
-  const filteredPacientes = patients.filter((paciente) => {
+  useEffect(() => {
+    const fetchPayments = async () => {
+      try {
+        const repo = new PaymentsRepository();
+        const data = await repo.getPayments();
+        setPayments(data);
+      } catch (err) {
+        console.error("Error fetching payments", err);
+      } finally {
+        setLoadingPayments(false);
+      }
+    };
+    fetchPayments();
+  }, []);
+
+  useEffect(() => {
+    const fetchSignedUrl = async () => {
+      if (!comprovanteModal) {
+        setSignedUrl(null);
+        return;
+      }
+
+      setLoadingUrl(true);
+      try {
+        const filesRepo = new FilesRepository();
+        const url = await filesRepo.getPresignedUrl(comprovanteModal);
+        setSignedUrl(url);
+      } catch (err) {
+        console.error("Error fetching signed URL", err);
+        setSignedUrl(null);
+      } finally {
+        setLoadingUrl(false);
+      }
+    };
+
+    fetchSignedUrl();
+  }, [comprovanteModal]);
+
+  const patientsWithPayments = patients.map((paciente) => {
+    const patientPayments = payments.filter(
+      (pay) => pay.patientId === paciente.id,
+    );
+    const successPayment = patientPayments.find(
+      (pay) => pay.status === "SUCCESS",
+    );
+
+    return {
+      ...paciente,
+      pago: !!successPayment || paciente.pago,
+      comprovante: successPayment?.image || paciente.comprovante,
+    };
+  });
+
+  const filteredPacientes = patientsWithPayments.filter((paciente) => {
     const search = searchTerm.toLowerCase();
     return (
       (paciente.name && paciente.name.toLowerCase().includes(search)) ||
@@ -55,7 +118,7 @@ export default function PatientsPage() {
     }
   };
 
-  if (loading)
+  if (loading || loadingPayments)
     return <div className="p-6 text-center">Carregando pacientes...</div>;
   if (error)
     return <div className="p-6 text-center text-red-600">Erro: {error}</div>;
@@ -273,24 +336,55 @@ export default function PatientsPage() {
 
       {/* Comprovante Modal */}
       {comprovanteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-[#1e3a5f]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-2xl w-full">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-semibold text-[#1e3a5f]">
                 Comprovante de Pagamento
               </h2>
               <button
                 onClick={() => setComprovanteModal(null)}
-                className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
               >
-                <X className="w-5 h-5 text-gray-600" />
+                <X className="w-6 h-6 text-gray-400" />
               </button>
             </div>
-            <img
-              src={comprovanteModal}
-              alt="Comprovante de Pagamento"
-              className="w-full h-auto"
-            />
+
+            <div className="bg-gray-50 rounded-xl overflow-hidden min-h-[300px] flex items-center justify-center border-2 border-dashed border-gray-200">
+              {loadingUrl ? (
+                <div className="flex flex-col items-center gap-3">
+                  <Loader2 className="w-10 h-10 animate-spin text-[#6eb5d8]" />
+                  <p className="text-gray-500">
+                    Gerando visualização segura...
+                  </p>
+                </div>
+              ) : signedUrl ? (
+                <img
+                  src={signedUrl}
+                  alt="Comprovante de Pagamento"
+                  className="w-full h-auto max-h-[60vh] object-contain"
+                />
+              ) : (
+                <div className="text-center p-6">
+                  <XCircle className="w-12 h-12 text-red-400 mx-auto mb-3" />
+                  <p className="text-gray-600">
+                    Não foi possível carregar a imagem.
+                  </p>
+                  <p className="text-sm text-gray-400 mt-2">
+                    O link pode ter expirado ou o arquivo não existe.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-8 flex justify-end">
+              <button
+                onClick={() => setComprovanteModal(null)}
+                className="px-6 py-2 bg-[#1e3a5f] text-white rounded-lg hover:bg-[#1e3a5f]/90 transition-colors"
+              >
+                Fechar
+              </button>
+            </div>
           </div>
         </div>
       )}

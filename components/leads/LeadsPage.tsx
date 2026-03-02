@@ -12,7 +12,8 @@ export default function LeadsPage() {
     return (
       (lead.name && lead.name.toLowerCase().includes(search)) ||
       (lead.document && formatCPF(lead.document).includes(searchTerm)) ||
-      (lead.phoneNumber && formatPhoneNumber(lead.phoneNumber).includes(searchTerm))
+      (lead.phoneNumber &&
+        formatPhoneNumber(lead.phoneNumber).includes(searchTerm))
     );
   });
 
@@ -79,7 +80,9 @@ export default function LeadsPage() {
                     }`}
                   >
                     <td className="px-6 py-4 text-gray-800">{lead.name}</td>
-                    <td className="px-6 py-4 text-gray-600">{formatCPF(lead.document)}</td>
+                    <td className="px-6 py-4 text-gray-600">
+                      {formatCPF(lead.document)}
+                    </td>
                     <td className="px-6 py-4 text-gray-600">
                       {formatPhoneNumber(lead.phoneNumber)}
                     </td>
