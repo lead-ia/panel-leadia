@@ -8,11 +8,10 @@ export class FilesRepository implements IFilesRepository {
   constructor() {
     // Note: process.env.URL_API_SERVICE_EXTERNAL must be defined.
     // If used on the client, ensure it's prefixed with NEXT_PUBLIC_ or handled via a proxy.
-    // this.baseUrl =
-    //   process.env.URL_API_SERVICE_EXTERNAL ||
-    //   process.env.NEXT_PUBLIC_URL_API_SERVICE_EXTERNAL ||
-    //   "";
-    this.baseUrl = "http://localhost:8000";
+    this.baseUrl =
+      process.env.URL_API_SERVICE_EXTERNAL ||
+      process.env.NEXT_PUBLIC_URL_API_SERVICE_EXTERNAL ||
+      "";
   }
 
   async getPresignedUrl(key: string): Promise<string> {
