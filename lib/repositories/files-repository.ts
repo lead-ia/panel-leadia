@@ -8,10 +8,11 @@ export class FilesRepository implements IFilesRepository {
   constructor() {
     // Note: process.env.URL_API_SERVICE_EXTERNAL must be defined.
     // If used on the client, ensure it's prefixed with NEXT_PUBLIC_ or handled via a proxy.
-    this.baseUrl =
-      process.env.URL_API_SERVICE_EXTERNAL ||
-      process.env.NEXT_PUBLIC_URL_API_SERVICE_EXTERNAL ||
-      "";
+    // this.baseUrl =
+    //   process.env.URL_API_SERVICE_EXTERNAL ||
+    //   process.env.NEXT_PUBLIC_URL_API_SERVICE_EXTERNAL ||
+    //   "";
+    this.baseUrl = "http://localhost:8000";
   }
 
   async getPresignedUrl(key: string): Promise<string> {
@@ -19,9 +20,12 @@ export class FilesRepository implements IFilesRepository {
       throw new Error("Files API URL is not configured");
     }
 
+    const fileKeySplit = key.split("comprovantes/");
+    const fileKey = "comprovantes/" + fileKeySplit[fileKeySplit.length - 1];
+
     try {
       const response = await fetch(
-        `${this.baseUrl}/api/files/presigned-url?key=${encodeURIComponent(key)}`,
+        `${this.baseUrl}/api/files/presigned-url?key=${encodeURIComponent(fileKey)}`,
       );
 
       if (!response.ok) {
