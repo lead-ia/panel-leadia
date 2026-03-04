@@ -1,7 +1,12 @@
-import axios from 'axios';
-import { format } from 'date-fns';
-import { Conversation, IChatRepository, Message, Contact } from './chat-repository';
-import { WahaWebsocket } from '../waha-websocket';
+import axios from "axios";
+import { format } from "date-fns";
+import {
+  Conversation,
+  IChatRepository,
+  Message,
+  Contact,
+} from "./chat-repository";
+import { WahaWebsocket } from "../waha-websocket";
 
 export class WahaWsChatRepository implements IChatRepository {
   private sessionName: string;
@@ -11,9 +16,9 @@ export class WahaWsChatRepository implements IChatRepository {
   private messageListeners: ((message: any) => void)[] = [];
 
   constructor(
-    sessionName: string, 
-    apiUrl: string = 'https://api.leadia.com.br',
-    wsUrl: string = 'wss://api.leadia.com.br/ws'
+    sessionName: string,
+    apiUrl: string = "https://api.leadia.com.br",
+    wsUrl: string = "wss://api.leadia.com.br/ws",
   ) {
     this.sessionName = sessionName;
     this.apiUrl = apiUrl;
@@ -23,12 +28,12 @@ export class WahaWsChatRepository implements IChatRepository {
   }
 
   private setupListeners() {
-    this.websocket.on('message', (data: any) => {
-        // The data from websocket might be wrapped or raw, depending on Waha version.
-        // Based on previous implementation: const data = JSON.parse(event.data); this.notifyListeners(data);
-        // And WahaWebsocket parses JSON and emits 'message' event with the data.
-        // So 'data' here is the parsed payload.
-        this.notifyListeners(data);
+    this.websocket.on("message", (data: any) => {
+      // The data from websocket might be wrapped or raw, depending on Waha version.
+      // Based on previous implementation: const data = JSON.parse(event.data); this.notifyListeners(data);
+      // And WahaWebsocket parses JSON and emits 'message' event with the data.
+      // So 'data' here is the parsed payload.
+      this.notifyListeners(data);
     });
   }
 
@@ -37,11 +42,13 @@ export class WahaWsChatRepository implements IChatRepository {
   }
 
   public removeMessageListener(callback: (message: any) => void) {
-    this.messageListeners = this.messageListeners.filter(listener => listener !== callback);
+    this.messageListeners = this.messageListeners.filter(
+      (listener) => listener !== callback,
+    );
   }
 
   private notifyListeners(message: any) {
-    this.messageListeners.forEach(listener => listener(message));
+    this.messageListeners.forEach((listener) => listener(message));
   }
 
   async getConversations(): Promise<Conversation[]> {
@@ -51,77 +58,96 @@ export class WahaWsChatRepository implements IChatRepository {
           `${this.apiUrl}/api/${this.sessionName}/chats/overview?limit=50`,
           {
             headers: {
-              'X-API-KEY': process.env.WAHA_API_KEY || process.env.NEXT_PUBLIC_WAHA_API_KEY,
+              "X-API-KEY":
+                process.env.WAHA_API_KEY ||
+                process.env.NEXT_PUBLIC_WAHA_API_KEY,
             },
-          }
+          },
         ),
-        this.getAllContacts(this.sessionName)
+        this.getAllContacts(this.sessionName),
       ]);
 
-      console.log('Waha API Response:', JSON.stringify(chatsResponse.data, null, 2));
+      console.log(
+        "Waha API Response:",
+        JSON.stringify(chatsResponse.data, null, 2),
+      );
 
       if (!chatsResponse.data || !Array.isArray(chatsResponse.data)) {
-        console.warn('Invalid response format from Waha API, returning mock data.');
+        console.warn(
+          "Invalid response format from Waha API, returning mock data.",
+        );
         return this.getMockData();
       }
 
-      const conversations = await Promise.all(chatsResponse.data.map(async (chat: any) => {
-        let time = '';
-        if (chat.lastMessage && chat.lastMessage.timestamp) {
+      const conversations = await Promise.all(
+        chatsResponse.data.map(async (chat: any) => {
+          let time = "";
+          if (chat.lastMessage && chat.lastMessage.timestamp) {
             try {
-                // Waha timestamp is usually in seconds, date-fns expects milliseconds
-                time = format(new Date(chat.lastMessage.timestamp * 1000), 'HH:mm');
+              // Waha timestamp is usually in seconds, date-fns expects milliseconds
+              time = format(
+                new Date(chat.lastMessage.timestamp * 1000),
+                "dd/MM/yy: HH:mm",
+              );
             } catch (e) {
-                console.error('Error formatting date', e);
-                time = '';
+              console.error("Error formatting date", e);
+              time = "";
             }
-        }
-
-        let name = chat.name || chat.id.split('@')[0];
-        let phoneNumber = chat.id.split('@')[0];
-
-        if (chat.id.endsWith('@lid')) {
-          const pn = await this.getPhoneNumberByLid(this.sessionName, chat.id);
-          if (pn) {
-            phoneNumber = pn.split('@')[0];
           }
-        }
 
-        const contact = contacts.find(c => c.id.includes(phoneNumber));
-        if (contact) {
-          name = contact.pushname || contact.name || name;
-        }
+          let name = chat.name || chat.id.split("@")[0];
+          let phoneNumber = chat.id.split("@")[0];
 
-        return {
-          id: chat.id,
-          name: name,
-          lastMessage: chat.lastMessage ? chat.lastMessage.body : '',
-          time: time,
-          unread: chat.unreadCount || 0, // Assuming unreadCount might be available, otherwise 0
-          tag: '', // Waha doesn't seem to have tags in the overview by default
-          avatar: chat.picture || '',
-        };
-      }));
+          if (chat.id.endsWith("@lid")) {
+            const pn = await this.getPhoneNumberByLid(
+              this.sessionName,
+              chat.id,
+            );
+            if (pn) {
+              phoneNumber = pn.split("@")[0];
+            }
+          }
+
+          const contact = contacts.find((c) => c.id.includes(phoneNumber));
+          if (contact) {
+            name = contact.pushname || contact.name || name;
+          }
+
+          return {
+            id: chat.id,
+            name: name,
+            lastMessage: chat.lastMessage ? chat.lastMessage.body : "",
+            time: time,
+            unread: chat.unreadCount || 0, // Assuming unreadCount might be available, otherwise 0
+            tag: "", // Waha doesn't seem to have tags in the overview by default
+            avatar: chat.picture || "",
+          };
+        }),
+      );
 
       return conversations;
     } catch (error) {
-      console.error('Error fetching chats from Waha API:', error);
+      console.error("Error fetching chats from Waha API:", error);
       return this.getMockData();
     }
   }
 
-  async getChatMessages(sessionName: string, chatId: string): Promise<Message[]> {
+  async getChatMessages(
+    sessionName: string,
+    chatId: string,
+  ): Promise<Message[]> {
     try {
       const response = await axios.get(
         `${this.apiUrl}/api/${sessionName}/chats/${chatId}/messages?limit=20&downloadMedia=true`,
         {
           headers: {
-            'X-API-KEY': process.env.WAHA_API_KEY || process.env.NEXT_PUBLIC_WAHA_API_KEY,
+            "X-API-KEY":
+              process.env.WAHA_API_KEY || process.env.NEXT_PUBLIC_WAHA_API_KEY,
           },
-        }
+        },
       );
 
-      console.log('Waha API Response:', JSON.stringify(response.data, null, 2));
+      console.log("Waha API Response:", JSON.stringify(response.data, null, 2));
 
       if (!response.data || !Array.isArray(response.data)) {
         return [];
@@ -131,13 +157,13 @@ export class WahaWsChatRepository implements IChatRepository {
         .map((msg: any) => this.parseMessage(msg))
         .filter((msg): msg is Message => msg !== null);
     } catch (error) {
-      console.error('Error fetching messages from Waha API:', error);
+      console.error("Error fetching messages from Waha API:", error);
       return [];
     }
   }
 
   private parseMessage(msg: any): Message | null {
-    let type: Message['type'] = 'chat';
+    let type: Message["type"] = "chat";
     let mediaUrl: string | undefined = undefined;
     let caption: string | undefined = undefined;
     let mimetype: string | undefined = undefined;
@@ -148,19 +174,19 @@ export class WahaWsChatRepository implements IChatRepository {
     // Check for message types in the "Message" object as per user request
     const messageContent = rawData.Message || {};
 
-    console.log('Incoming message content: ', messageContent);
+    console.log("Incoming message content: ", messageContent);
 
     if (messageContent.documentMessage) {
-      type = 'document';
+      type = "document";
       const docMsg = messageContent.documentMessage;
       mediaUrl = docMsg.URL;
       mimetype = docMsg.mimetype;
       fileName = docMsg.fileName;
       fileLength = docMsg.fileLength;
       // Caption might be present but usually document name is more important
-      caption = docMsg.caption; 
+      caption = docMsg.caption;
     } else if (messageContent.imageMessage) {
-      type = 'image';
+      type = "image";
       const imgMsg = messageContent.imageMessage;
       mediaUrl = imgMsg.URL;
       mimetype = imgMsg.mimetype;
@@ -172,16 +198,16 @@ export class WahaWsChatRepository implements IChatRepository {
       // Ignore audio as per requirement
       return null;
     } else if (messageContent.videoMessage) {
-       return null
+      return null;
     } else if (messageContent.conversation) {
-       type = 'chat';
-       // Standard text message
+      type = "chat";
+      // Standard text message
     } else {
-       return null
+      return null;
     }
 
     // Ensure we have a body for text messages
-    const body = msg.body || caption || fileName || '';
+    const body = msg.body || caption || fileName || "";
 
     return {
       id: msg.id,
@@ -197,7 +223,7 @@ export class WahaWsChatRepository implements IChatRepository {
       caption,
       mimetype,
       fileName,
-      fileLength
+      fileLength,
     };
   }
 
@@ -207,26 +233,31 @@ export class WahaWsChatRepository implements IChatRepository {
         `${this.apiUrl}/api/contacts/all?session=${sessionName}`,
         {
           headers: {
-            'X-API-KEY': process.env.WAHA_API_KEY || process.env.NEXT_PUBLIC_WAHA_API_KEY,
+            "X-API-KEY":
+              process.env.WAHA_API_KEY || process.env.NEXT_PUBLIC_WAHA_API_KEY,
           },
-        }
+        },
       );
       return response.data;
     } catch (error) {
-      console.error('Error fetching contacts from Waha API:', error);
+      console.error("Error fetching contacts from Waha API:", error);
       return [];
     }
   }
 
-  async getPhoneNumberByLid(sessionName: string, lid: string): Promise<string | null> {
+  async getPhoneNumberByLid(
+    sessionName: string,
+    lid: string,
+  ): Promise<string | null> {
     try {
       const response = await axios.get(
         `${this.apiUrl}/api/${sessionName}/lids/${lid}`,
         {
           headers: {
-            'X-API-KEY': process.env.WAHA_API_KEY || process.env.NEXT_PUBLIC_WAHA_API_KEY,
+            "X-API-KEY":
+              process.env.WAHA_API_KEY || process.env.NEXT_PUBLIC_WAHA_API_KEY,
           },
-        }
+        },
       );
       return response.data?.pn || null;
     } catch (error) {
@@ -238,49 +269,49 @@ export class WahaWsChatRepository implements IChatRepository {
   private getMockData(): Conversation[] {
     return [
       {
-        id: '1',
-        name: 'Maria Silva',
-        lastMessage: 'Gostaria de remarcar minha consulta',
-        time: '10:30',
+        id: "1",
+        name: "Maria Silva",
+        lastMessage: "Gostaria de remarcar minha consulta",
+        time: "04/03/26: 10:30",
         unread: 2,
-        tag: 'Urgente',
-        avatar: 'MS',
+        tag: "Urgente",
+        avatar: "MS",
       },
       {
-        id: '2',
-        name: 'João Santos',
-        lastMessage: 'Obrigado pelo atendimento!',
-        time: '09:45',
+        id: "2",
+        name: "João Santos",
+        lastMessage: "Obrigado pelo atendimento!",
+        time: "04/03/26: 09:45",
         unread: 0,
-        tag: 'Concluído',
-        avatar: 'JS',
+        tag: "Concluído",
+        avatar: "JS",
       },
       {
-        id: '3',
-        name: 'Ana Oliveira',
-        lastMessage: 'Qual o horário disponível?',
-        time: '08:20',
+        id: "3",
+        name: "Ana Oliveira",
+        lastMessage: "Qual o horário disponível?",
+        time: "04/03/26: 08:20",
         unread: 1,
-        tag: 'Agendamento',
-        avatar: 'AO',
+        tag: "Agendamento",
+        avatar: "AO",
       },
       {
-        id: '4',
-        name: 'Carlos Mendes',
-        lastMessage: 'Preciso dos resultados do exame',
-        time: 'Ontem',
+        id: "4",
+        name: "Carlos Mendes",
+        lastMessage: "Preciso dos resultados do exame",
+        time: "03/03/26: 15:00",
         unread: 3,
-        tag: 'Exames',
-        avatar: 'CM',
+        tag: "Exames",
+        avatar: "CM",
       },
       {
-        id: '5',
-        name: 'Beatriz Costa',
-        lastMessage: 'Confirmado para amanhã',
-        time: 'Ontem',
+        id: "5",
+        name: "Beatriz Costa",
+        lastMessage: "Confirmado para amanhã",
+        time: "03/03/26: 14:30",
         unread: 0,
-        tag: 'Confirmado',
-        avatar: 'BC',
+        tag: "Confirmado",
+        avatar: "BC",
       },
     ];
   }

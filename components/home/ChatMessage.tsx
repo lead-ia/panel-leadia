@@ -1,5 +1,6 @@
 import { Tag } from "lucide-react";
 import { Message } from "@/lib/repositories/chat-repository";
+import { format } from "date-fns";
 
 interface ChatMessageProps {
   message: Message;
@@ -63,10 +64,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
             message.fromMe ? "text-white/70" : "text-gray-500"
           }`}
         >
-          {new Date(message.timestamp * 1000).toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
+          {format(new Date(message.timestamp * 1000), "dd/MM/yy: HH:mm")}
         </p>
       </div>
     </div>

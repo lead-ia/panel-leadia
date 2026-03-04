@@ -17,7 +17,14 @@ export interface Message {
   hasMedia: boolean;
   ack: number; // 0: pending, 1: sent, 2: delivered, 3: read, 4: played
   fromMe: boolean;
-  type: 'chat' | 'image' | 'sticker' | 'document' | 'video' | 'audio' | 'unknown';
+  type:
+    | "chat"
+    | "image"
+    | "sticker"
+    | "document"
+    | "video"
+    | "audio"
+    | "unknown";
   mediaUrl?: string;
   caption?: string;
   mimetype?: string;
@@ -47,113 +54,116 @@ export class ChatRepository implements IChatRepository {
 
     return [
       {
-        id: '1',
-        name: 'Maria Silva',
-        lastMessage: 'Gostaria de remarcar minha consulta',
-        time: '10:30',
+        id: "1",
+        name: "Maria Silva",
+        lastMessage: "Gostaria de remarcar minha consulta",
+        time: "04/03/26: 10:30",
         unread: 2,
-        tag: 'Urgente',
-        avatar: 'MS',
+        tag: "Urgente",
+        avatar: "MS",
       },
       {
-        id: '2',
-        name: 'João Santos',
-        lastMessage: 'Obrigado pelo atendimento!',
-        time: '09:45',
+        id: "2",
+        name: "João Santos",
+        lastMessage: "Obrigado pelo atendimento!",
+        time: "04/03/26: 09:45",
         unread: 0,
-        tag: 'Concluído',
-        avatar: 'JS',
+        tag: "Concluído",
+        avatar: "JS",
       },
       {
-        id: '3',
-        name: 'Ana Oliveira',
-        lastMessage: 'Qual o horário disponível?',
-        time: '08:20',
+        id: "3",
+        name: "Ana Oliveira",
+        lastMessage: "Qual o horário disponível?",
+        time: "04/03/26: 08:20",
         unread: 1,
-        tag: 'Agendamento',
-        avatar: 'AO',
+        tag: "Agendamento",
+        avatar: "AO",
       },
       {
-        id: '4',
-        name: 'Carlos Mendes',
-        lastMessage: 'Preciso dos resultados do exame',
-        time: 'Ontem',
+        id: "4",
+        name: "Carlos Mendes",
+        lastMessage: "Preciso dos resultados do exame",
+        time: "03/03/26: 15:00",
         unread: 3,
-        tag: 'Exames',
-        avatar: 'CM',
+        tag: "Exames",
+        avatar: "CM",
       },
       {
-        id: '5',
-        name: 'Beatriz Costa',
-        lastMessage: 'Confirmado para amanhã',
-        time: 'Ontem',
+        id: "5",
+        name: "Beatriz Costa",
+        lastMessage: "Confirmado para amanhã",
+        time: "03/03/26: 14:30",
         unread: 0,
-        tag: 'Confirmado',
-        avatar: 'BC',
+        tag: "Confirmado",
+        avatar: "BC",
       },
       {
-        id: '6',
-        name: 'Pedro Alves',
-        lastMessage: 'Preciso agendar uma consulta',
-        time: 'Ontem',
+        id: "6",
+        name: "Pedro Alves",
+        lastMessage: "Preciso agendar uma consulta",
+        time: "03/03/26: 11:20",
         unread: 1,
-        tag: 'Agendamento',
-        avatar: 'PA',
+        tag: "Agendamento",
+        avatar: "PA",
       },
       {
-        id: '7',
-        name: 'Lucia Martins',
-        lastMessage: 'Pode me enviar o comprovante?',
-        time: '2 dias',
+        id: "7",
+        name: "Lucia Martins",
+        lastMessage: "Pode me enviar o comprovante?",
+        time: "02/03/26: 16:45",
         unread: 0,
-        tag: 'Confirmado',
-        avatar: 'LM',
+        tag: "Confirmado",
+        avatar: "LM",
       },
       {
-        id: '8',
-        name: 'Roberto Silva',
-        lastMessage: 'Esqueci minha carteira de convênio',
-        time: '2 dias',
+        id: "8",
+        name: "Roberto Silva",
+        lastMessage: "Esqueci minha carteira de convênio",
+        time: "02/03/26: 10:15",
         unread: 2,
-        tag: 'Urgente',
-        avatar: 'RS',
+        tag: "Urgente",
+        avatar: "RS",
       },
       {
-        id: '9',
-        name: 'Fernanda Costa',
-        lastMessage: 'Estava sentindo dores ontem',
-        time: '2 dias',
+        id: "9",
+        name: "Fernanda Costa",
+        lastMessage: "Estava sentindo dores ontem",
+        time: "02/03/26: 09:30",
         unread: 1,
-        tag: 'Urgente',
-        avatar: 'FC',
+        tag: "Urgente",
+        avatar: "FC",
       },
     ];
   }
 
-  async getChatMessages(sessionName: string, chatId: string): Promise<Message[]> {
+  async getChatMessages(
+    sessionName: string,
+    chatId: string,
+  ): Promise<Message[]> {
     await new Promise((resolve) => setTimeout(resolve, 500));
     return [
       {
-        id: '1',
-        body: 'Olá, tudo bem?',
-        from: '123456789',
-        to: 'me',
+        id: "1",
+        body: "Olá, tudo bem?",
+        from: "123456789",
+        to: "me",
         timestamp: Date.now() / 1000 - 3600,
         hasMedia: false,
         ack: 3,
         fromMe: false,
-        type: 'chat',
+        type: "chat",
       },
       {
-        id: '2',
-        body: 'Tudo ótimo! E com você?',
-        from: 'me',
-        to: '123456789',
+        id: "2",
+        body: "Tudo ótimo! E com você?",
+        from: "me",
+        to: "123456789",
         timestamp: Date.now() / 1000 - 3500,
         hasMedia: false,
         ack: 2,
         fromMe: true,
-        type: 'chat',
+        type: "chat",
       },
     ];
   }
@@ -162,7 +172,10 @@ export class ChatRepository implements IChatRepository {
     return [];
   }
 
-  async getPhoneNumberByLid(sessionName: string, lid: string): Promise<string | null> {
+  async getPhoneNumberByLid(
+    sessionName: string,
+    lid: string,
+  ): Promise<string | null> {
     return null;
   }
 
