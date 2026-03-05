@@ -103,7 +103,6 @@ export function SettingsPage() {
       icon: Users,
     },
     { id: "lembretes", title: "9. Lembretes e confirmações", icon: Bell },
-    { id: "teste-ia", title: "10. Teste da IA", icon: TestTube2 },
   ];
 
   return (

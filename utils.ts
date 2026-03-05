@@ -1,4 +1,4 @@
-const countries = {
+export const countries = {
   AF: "Afeganistão",
   ZA: "África do Sul",
   AL: "Albânia",

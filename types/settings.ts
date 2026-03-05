@@ -5,6 +5,7 @@ export interface BasicInfo {
   subspecialty?: string;
   crm: string;
   uf: string;
+  country: string;
   profilePicture?: string; // URL or base64
   bio?: string;
   personalPhoneNumber?: string;

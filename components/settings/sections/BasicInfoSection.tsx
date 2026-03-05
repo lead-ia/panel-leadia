@@ -3,7 +3,7 @@ import { useUser } from "@/components/auth/user-context";
 import { BasicInfo, Settings } from "@/types/settings";
 import { useDebouncedCallback } from "@/hooks/use-debounce";
 import { useStorage } from "@/hooks/use-storage";
-import { maskPhone, ufs } from "@/utils";
+import { maskPhone, ufs, countries } from "@/utils";
 
 export function BasicInfoSection() {
   const { dbUser, updateSettings, updateUser } = useUser();
@@ -22,19 +22,25 @@ export function BasicInfoSection() {
     subspecialty: "",
     crm: "",
     uf: "",
+    country: "BR",
     bio: "",
   };
 
   const [localData, setLocalData] = useState<BasicInfo>(
-    dbUser?.settings?.basicInfo || baseSettings,
+    dbUser?.settings?.basicInfo
+      ? { ...baseSettings, ...dbUser?.settings?.basicInfo }
+      : baseSettings,
   );
 
-  // Update local state when dbUser changes (initial load or external update)
   useEffect(() => {
-    if (dbUser?.settings?.basicInfo) {
-      setLocalData(dbUser.settings.basicInfo);
+    const basicInfo = dbUser?.settings?.basicInfo;
+    if (basicInfo) {
+      setLocalData((prev) => ({
+        ...baseSettings,
+        ...basicInfo,
+      }));
     }
-  }, []);
+  }, [dbUser?.settings?.basicInfo]);
 
   const debouncedUpdate = useDebouncedCallback((updatedData: BasicInfo) => {
     updateSettings({
@@ -124,23 +130,6 @@ export function BasicInfoSection() {
         </div>
         <div>
           <label className="block text-sm text-gray-700 mb-2">
-            Telemóvel / WhatsApp *
-          </label>
-          <input
-            type="tel"
-            value={localData.personalPhoneNumber}
-            onChange={(e) =>
-              handleChange("personalPhoneNumber", e.target.value)
-            }
-            placeholder="Ex: (11) 98765-4321"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm text-gray-700 mb-2">
             Subespecialidade (opcional)
           </label>
           <input
@@ -164,6 +153,23 @@ export function BasicInfoSection() {
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
           />
         </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm text-gray-700 mb-2">País *</label>
+          <select
+            value={localData.country}
+            onChange={(e) => handleChange("country", e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
+          >
+            {Object.entries(countries).map(([code, name]) => (
+              <option key={code} value={code}>
+                {code} - {name}
+              </option>
+            ))}
+          </select>
+        </div>
         <div>
           <label className="block text-sm text-gray-700 mb-2">UF *</label>
           <select
@@ -179,6 +185,18 @@ export function BasicInfoSection() {
             ))}
           </select>
         </div>
+      </div>
+      <div>
+        <label className="block text-sm text-gray-700 mb-2">
+          Whatsapp Médico (Notificações)
+        </label>
+        <input
+          type="tel"
+          value={localData.personalPhoneNumber}
+          onChange={(e) => handleChange("personalPhoneNumber", e.target.value)}
+          placeholder="Ex: (11) 98765-4321"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
+        />
       </div>
 
       <div>
