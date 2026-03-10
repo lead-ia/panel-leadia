@@ -13,6 +13,9 @@ export function PaymentMethodsSection() {
   const defaultPaymentMethods: PaymentMethods = {
     onlineConsultationPrice: "",
     inPersonConsultationPrice: "",
+    firstOnlineConsultationPrice: "",
+    firstInPersonConsultationPrice: "",
+    requiresDeposit: false,
     acceptedMethods: ["PIX", "Cartão de crédito"],
   };
 
@@ -78,6 +81,62 @@ export function PaymentMethodsSection() {
             }}
           />
         </div>
+        <div>
+          <label className="block text-sm text-gray-700 mb-2">
+            Valor da primeira consulta online
+          </label>
+          <CurrencyMaskedInput
+            name="firstOnlineConsultationPrice"
+            value={
+              localData?.firstOnlineConsultationPrice
+                ? +localData.firstOnlineConsultationPrice
+                : 0
+            }
+            onChange={(value) => {
+              handleChange("firstOnlineConsultationPrice", value);
+            }}
+          />
+        </div>
+        <div>
+          <label className="block text-sm text-gray-700 mb-2">
+            Valor da primeira consulta presencial
+          </label>
+          <CurrencyMaskedInput
+            name="firstInPersonConsultationPrice"
+            value={
+              localData?.firstInPersonConsultationPrice
+                ? +localData.firstInPersonConsultationPrice
+                : 0
+            }
+            onChange={(value) => {
+              handleChange("firstInPersonConsultationPrice", value);
+            }}
+          />
+        </div>
+      </div>
+
+      <div className="border border-[#e5ecf3] rounded-lg p-5 bg-[#f4f8fb]">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-[#1e3a5f] font-medium text-[15px]">
+              Pratica valor de entrada (caução)?
+            </h3>
+            <p className="text-[13px] text-gray-500 mt-1">
+              Solicitar pagamento de entrada ao agendar
+            </p>
+          </div>
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={localData.requiresDeposit || false}
+              onChange={(e) =>
+                handleChange("requiresDeposit", e.target.checked)
+              }
+              className="sr-only peer"
+            />
+            <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#6eb5d8]"></div>
+          </label>
+        </div>
       </div>
 
       <div>
@@ -97,7 +156,7 @@ export function PaymentMethodsSection() {
             >
               <input
                 type="checkbox"
-                checked={localData.acceptedMethods.includes(forma)}
+                checked={(localData.acceptedMethods || []).includes(forma)}
                 onChange={() => toggleMethod(forma)}
                 className="text-[#6eb5d8]"
               />

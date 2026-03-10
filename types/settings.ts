@@ -55,6 +55,9 @@ export interface Availability {
 export interface PaymentMethods {
   onlineConsultationPrice: string;
   inPersonConsultationPrice: string;
+  firstOnlineConsultationPrice?: string;
+  firstInPersonConsultationPrice?: string;
+  requiresDeposit?: boolean;
   acceptedMethods: string[];
 }
 
