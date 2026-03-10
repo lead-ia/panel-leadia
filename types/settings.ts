@@ -16,8 +16,6 @@ export interface ClinicInfo {
   clinicName: string;
   address: string;
   onlineConsultationLink: string;
-  standardDurationInPerson: string; // e.g., "60 minutos"
-  standardDurationOnline: string; // e.g., "45 minutos"
   billingAddressSameAsClinic?: boolean;
   billingAddress?: string;
 }
@@ -35,6 +33,7 @@ export interface AvailabilitySlot {
   startTime: string;
   endTime: string;
   interval: string;
+  duration?: string; // e.g., '60 minutos'
   futureSchedulingDays: number;
 }
 
@@ -103,6 +102,17 @@ export interface ReminderInfo {
   };
 }
 
+export interface PreConsultationInfo {
+  basicGuidance: {
+    message: string;
+    pdfUrl?: string;
+  };
+  preConsultationGuidance: {
+    message: string;
+    pdfUrl?: string;
+  };
+}
+
 export interface Settings {
   basicInfo: BasicInfo;
   clinicInfo: ClinicInfo;
@@ -111,6 +121,7 @@ export interface Settings {
   paymentMethods: PaymentMethods;
   leadFollowUpInfo: LeadFollowUpInfo;
   patientFollowUpInfo: PatientFollowUpInfo;
+  preConsultationInfo: PreConsultationInfo;
   reminderInfo: ReminderInfo;
 }
 

@@ -11,9 +11,13 @@ export function PatientFollowUpSection() {
 
   const defaultPatientFollowUpInfo: PatientFollowUpInfo = {
     enabled: false,
-    frequencyDays: 30,
-    message:
+    daysAfter: 30,
+    periodicMessage:
       "Olá [NOME], faz algum tempo que não nos vemos. Como você está se sentindo? Gostaria de agendar uma consulta de rotina?",
+    birthdayEnabled: false,
+    birthdayMessage:
+      "Parabéns [NOME]! Desejamos muita saúde e felicidade no seu aniversário!",
+    commemorativeMessages: [],
   };
 
   const data =
@@ -74,9 +78,9 @@ export function PatientFollowUpSection() {
             </label>
             <input
               type="number"
-              value={localData.frequencyDays}
+              value={localData.daysAfter}
               onChange={(e) =>
-                handleChange("frequencyDays", parseInt(e.target.value))
+                handleChange("daysAfter", parseInt(e.target.value))
               }
               min="1"
               max="365"
@@ -91,8 +95,8 @@ export function PatientFollowUpSection() {
             </label>
             <textarea
               rows={4}
-              value={localData.message}
-              onChange={(e) => handleChange("message", e.target.value)}
+              value={localData.periodicMessage}
+              onChange={(e) => handleChange("periodicMessage", e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
             />
             <p className="text-xs text-gray-500 mt-1">

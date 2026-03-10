@@ -19,6 +19,7 @@ export function AgendaSection() {
       startTime: "08:00",
       endTime: "18:00",
       interval: "45 minutos",
+      duration: "45 minutos",
       futureSchedulingDays: 30,
     },
     inPerson: {
@@ -26,6 +27,7 @@ export function AgendaSection() {
       startTime: "08:00",
       endTime: "18:00",
       interval: "60 minutos",
+      duration: "60 minutos",
       futureSchedulingDays: 30,
     },
     blocks: [],
@@ -223,7 +225,24 @@ export function AgendaSection() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm text-gray-700 mb-2">
+                  Tempo padrão da consulta
+                </label>
+                <select
+                  value={localData.online.duration || "45 minutos"}
+                  onChange={(e) =>
+                    handleOnlineChange("duration", e.target.value)
+                  }
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
+                >
+                  <option>15 minutos</option>
+                  <option>30 minutos</option>
+                  <option>45 minutos</option>
+                  <option>60 minutos</option>
+                </select>
+              </div>
               <div>
                 <label className="block text-sm text-gray-700 mb-2">
                   Intervalo entre consultas
@@ -325,7 +344,24 @@ export function AgendaSection() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm text-gray-700 mb-2">
+                  Tempo padrão da consulta
+                </label>
+                <select
+                  value={localData.inPerson.duration || "60 minutos"}
+                  onChange={(e) =>
+                    handleInPersonChange("duration", e.target.value)
+                  }
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6eb5d8]"
+                >
+                  <option>15 minutos</option>
+                  <option>30 minutos</option>
+                  <option>45 minutos</option>
+                  <option>60 minutos</option>
+                </select>
+              </div>
               <div>
                 <label className="block text-sm text-gray-700 mb-2">
                   Intervalo entre consultas

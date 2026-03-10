@@ -23,6 +23,7 @@ import { AiPreferencesSection } from "./sections/AiPreferencesSection";
 import { AgendaSection } from "./sections/AgendaSection";
 import { PaymentMethodsSection } from "./sections/PaymentMethodsSection";
 import { LeadFollowUpUpdatedSection } from "./sections/LeadFollowUpUpdatedSection";
+import { LeadFollowUpSection } from "./sections/LeadFollowUpSection";
 import { PatientFollowUpUpdatedSection } from "./sections/PatientFollowUpUpdatedSection";
 import { RemindersSection } from "./sections/RemindersSection";
 
@@ -35,6 +36,7 @@ type Section =
   | "formas-pagamento"
   | "followup-lead"
   | "followup-paciente"
+  | "instructions"
   | "lembretes";
 
 export function SettingsPage() {
@@ -102,7 +104,8 @@ export function SettingsPage() {
       title: "8. Follow-up de pacientes",
       icon: Users,
     },
-    { id: "lembretes", title: "9. Lembretes e confirmações", icon: Bell },
+    { id: "instructions", title: "9. Instruções pré consulta", icon: Bell },
+    { id: "lembretes", title: "10. Lembretes e confirmações", icon: Bell },
   ];
 
   return (
@@ -162,6 +165,7 @@ export function SettingsPage() {
                     {section.id === "followup-paciente" && (
                       <PatientFollowUpUpdatedSection />
                     )}
+                    {section.id === "instructions" && <LeadFollowUpSection />}
                     {section.id === "lembretes" && <RemindersSection />}
                   </div>
                 )}
