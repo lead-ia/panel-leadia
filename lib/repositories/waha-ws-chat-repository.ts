@@ -67,11 +67,6 @@ export class WahaWsChatRepository implements IChatRepository {
         this.getAllContacts(this.sessionName),
       ]);
 
-      console.log(
-        "Waha API Response:",
-        JSON.stringify(chatsResponse.data, null, 2),
-      );
-
       if (!chatsResponse.data || !Array.isArray(chatsResponse.data)) {
         console.warn(
           "Invalid response format from Waha API, returning mock data.",
@@ -135,10 +130,11 @@ export class WahaWsChatRepository implements IChatRepository {
   async getChatMessages(
     sessionName: string,
     chatId: string,
+    limit: number = 20,
   ): Promise<Message[]> {
     try {
       const response = await axios.get(
-        `${this.apiUrl}/api/${sessionName}/chats/${chatId}/messages?limit=20&downloadMedia=true`,
+        `${this.apiUrl}/api/${sessionName}/chats/${chatId}/messages?limit=${limit}&downloadMedia=true`,
         {
           headers: {
             "X-API-KEY":
@@ -147,15 +143,19 @@ export class WahaWsChatRepository implements IChatRepository {
         },
       );
 
-      console.log("Waha API Response:", JSON.stringify(response.data, null, 2));
+      console.log(
+        "Waha API Response for getting chat messages:",
+        JSON.stringify(response.data, null, 2),
+      );
 
       if (!response.data || !Array.isArray(response.data)) {
         return [];
       }
-
-      return response.data
+      const result = response.data
         .map((msg: any) => this.parseMessage(msg))
         .filter((msg): msg is Message => msg !== null);
+      console.log("Parsed messages:", JSON.stringify(result, null, 2));
+      return result;
     } catch (error) {
       console.error("Error fetching messages from Waha API:", error);
       return [];
@@ -173,8 +173,6 @@ export class WahaWsChatRepository implements IChatRepository {
     const rawData = msg._data || {};
     // Check for message types in the "Message" object as per user request
     const messageContent = rawData.Message || {};
-
-    console.log("Incoming message content: ", messageContent);
 
     if (messageContent.documentMessage) {
       type = "document";
@@ -199,9 +197,15 @@ export class WahaWsChatRepository implements IChatRepository {
       return null;
     } else if (messageContent.videoMessage) {
       return null;
-    } else if (messageContent.conversation) {
+    } else if (
+      messageContent.conversation ||
+      messageContent.extendedTextMessage
+    ) {
       type = "chat";
       // Standard text message
+    } else if (msg.body) {
+      type = "chat";
+      // Fallback for any other message types that have a body
     } else {
       return null;
     }

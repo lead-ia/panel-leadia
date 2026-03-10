@@ -7,9 +7,8 @@ interface ChatMessageProps {
 }
 
 export function ChatMessage({ message }: ChatMessageProps) {
-  console.log("Incoming message: ", message);
   // Hide stickers completely
-  if (message.type === "sticker") {
+  if (message.type === "sticker" || message.type === "image") {
     return <></>;
   }
 
@@ -26,10 +25,10 @@ export function ChatMessage({ message }: ChatMessageProps) {
             : "bg-white text-gray-800 rounded-bl-none shadow-md"
         }`}
       >
-        {message.type === "image" && message.mediaUrl ? (
+        {/* {message.type === "image" ? (
           <div className="mb-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+        {/* <img
               src={message.mediaUrl}
               alt="Image"
               className="rounded-lg max-w-full h-auto"
@@ -38,8 +37,9 @@ export function ChatMessage({ message }: ChatMessageProps) {
                 (e.target as HTMLImageElement).style.display = "none";
               }}
             />
-          </div>
-        ) : message.type === "document" ? (
+          </div> */}
+        {/* ) :  */}
+        {message.type === "document" ? (
           <div className="flex items-center gap-2 mb-2 p-2 bg-black/10 rounded-lg">
             <div className="bg-white/20 p-2 rounded">
               <Tag className="w-6 h-6" />

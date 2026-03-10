@@ -35,18 +35,6 @@ export class WahaChatRepository implements IChatRepository {
         this.getAllContacts(this.sessionName),
       ]);
 
-      console.log(
-        "Waha API Response:",
-        JSON.stringify(chatsResponse.data, null, 2),
-      );
-
-      if (!chatsResponse.data || !Array.isArray(chatsResponse.data)) {
-        console.warn(
-          "Invalid response format from Waha API, returning mock data.",
-        );
-        return this.getMockData();
-      }
-
       const conversations = await Promise.all(
         chatsResponse.data.map(async (chat: any) => {
           let time = "";
@@ -118,6 +106,8 @@ export class WahaChatRepository implements IChatRepository {
       if (!response.data || !Array.isArray(response.data)) {
         return [];
       }
+
+      console.log("response.data", response.data);
 
       return response.data.map((msg: any) => {
         let type: Message["type"] = "chat";
