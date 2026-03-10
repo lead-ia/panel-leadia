@@ -8,6 +8,7 @@ export const DASHBOARD_ROUTES = {
   DASHBOARD: "/dashboard-main/dashboard",
   LEADS: "/dashboard-main/leads",
   PATIENTS: "/dashboard-main/patients",
+  CHATS: "/dashboard-main/chats",
   SETTINGS: "/dashboard-main/settings",
 } as const;
 

@@ -40,7 +40,11 @@ export interface Contact {
 
 export interface IChatRepository {
   getConversations(): Promise<Conversation[]>;
-  getChatMessages(sessionName: string, chatId: string): Promise<Message[]>;
+  getChatMessages(
+    sessionName: string,
+    chatId: string,
+    limit?: number,
+  ): Promise<Message[]>;
   getAllContacts(sessionName: string): Promise<Contact[]>;
   getPhoneNumberByLid(sessionName: string, lid: string): Promise<string | null>;
   onNewMessage(callback: (message: any) => void): void;
@@ -140,6 +144,7 @@ export class ChatRepository implements IChatRepository {
   async getChatMessages(
     sessionName: string,
     chatId: string,
+    limit?: number,
   ): Promise<Message[]> {
     await new Promise((resolve) => setTimeout(resolve, 500));
     return [

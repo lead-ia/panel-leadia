@@ -37,7 +37,6 @@ export class FilesRepository implements IFilesRepository {
       }
 
       const data = await response.json();
-      console.log("Incoming url: ", data.url);
       return data.url;
     } catch (error) {
       console.error("FilesRepository.getPresignedUrl error:", error);

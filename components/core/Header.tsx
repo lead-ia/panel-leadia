@@ -6,6 +6,7 @@ import {
   LogOut,
   MessageCircle,
   LayoutDashboard,
+  MessageSquare,
 } from "lucide-react";
 import { getAuth, signOut } from "firebase/auth";
 import { app } from "@/firebase";
@@ -31,6 +32,7 @@ export function Header({ currentPath, logo }: HeaderProps) {
       icon: LayoutDashboard,
     },
     { href: "/dashboard-main/leads", label: "Leads", icon: MessageCircle },
+    { href: "/dashboard-main/chats", label: "Chats", icon: MessageSquare },
     { href: "/dashboard-main/patients", label: "Pacientes", icon: Users },
     {
       href: "/dashboard-main/settings",

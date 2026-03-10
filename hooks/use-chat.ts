@@ -1,15 +1,20 @@
-import { useState, useEffect } from 'react';
-import {  Conversation, IChatRepository } from '@/lib/repositories/chat-repository';
-import { useWhatsappSession } from './use-whatsapp-session';
+import { useState, useEffect } from "react";
+import {
+  Conversation,
+  IChatRepository,
+} from "@/lib/repositories/chat-repository";
+import { useWhatsappSession } from "./use-whatsapp-session";
 
-
-
-export function useChat(options?: { useWebsockets?: boolean; sessionName: string }) {
+export function useChat(options?: {
+  useWebsockets?: boolean;
+  sessionName: string;
+  messagesLimit?: number;
+}) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const {sessionStatus} = useWhatsappSession(options?.sessionName || '');
+  const { sessionStatus } = useWhatsappSession(options?.sessionName || "");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [messagesLoading, setMessagesLoading] = useState(false);
@@ -18,15 +23,17 @@ export function useChat(options?: { useWebsockets?: boolean; sessionName: string
   const [repository, setRepository] = useState<IChatRepository | null>(null);
 
   useEffect(() => {
-    if (!options?.sessionName || sessionStatus !== 'WORKING') {
-      return
+    if (!options?.sessionName || sessionStatus !== "WORKING") {
+      return;
     }
 
     let repo: IChatRepository;
 
-      const { WahaWsChatRepository } = require('@/lib/repositories/waha-ws-chat-repository');
-      repo = new WahaWsChatRepository(options.sessionName);
-    
+    const {
+      WahaWsChatRepository,
+    } = require("@/lib/repositories/waha-ws-chat-repository");
+    repo = new WahaWsChatRepository(options.sessionName);
+
     setRepository(repo);
 
     const fetchConversations = async () => {
@@ -37,7 +44,7 @@ export function useChat(options?: { useWebsockets?: boolean; sessionName: string
       } catch (err) {
         setConversations([]);
         setLoading(false);
-        setError('Failed to fetch conversations');
+        setError("Failed to fetch conversations");
       }
     };
 
@@ -61,17 +68,21 @@ export function useChat(options?: { useWebsockets?: boolean; sessionName: string
       setMessagesLoading(true);
       setMessagesError(null);
       try {
-        const msgs = await repository.getChatMessages(options.sessionName, selectedChat.toString());
+        const msgs = await repository.getChatMessages(
+          options.sessionName,
+          selectedChat.toString(),
+          options.messagesLimit,
+        );
         setMessages(msgs);
       } catch (err) {
-        setMessagesError('Failed to load messages');
+        setMessagesError("Failed to load messages");
       } finally {
         setMessagesLoading(false);
       }
     };
 
     fetchMessages();
-  }, [selectedChat, repository, options?.sessionName]);
+  }, [selectedChat, repository, options?.sessionName, options?.messagesLimit]);
 
   const handleChatClick = (chat: Conversation | null) => {
     if (chat == null) {
@@ -88,6 +99,6 @@ export function useChat(options?: { useWebsockets?: boolean; sessionName: string
     messages,
     messagesLoading,
     messagesError,
-    handleChatClick
+    handleChatClick,
   };
 }
